@@ -46,28 +46,13 @@ class FirstActivity : AppCompatActivity() {
         }
 
 
-
-
-
-
-
-
-        // fusedLocationClient=LocationServices.getFusedLocationProviderClient(this)
-       // fusedLocationClient.lastLocation.addOnSuccessListener{location : Location -> }
-
-
         nextButton.setOnClickListener {
             val usrName = userName.text.toString()
 
             val  intent = Intent(this@FirstActivity,MainActivity::class.java).apply {
-                val  sharedPreferences=getSharedPreferences("weather",Context.MODE_PRIVATE)
-                var editor=sharedPreferences.edit()
-                editor.putString("name",usrName)
-                editor.putString("city",city)
-                editor.commit()
+                save("name",usrName)
+                save("unit","celsius")
 
-               // putExtra("name",usrName)
-                //putExtra("city",city)
             }
             startActivity(intent)
         }
@@ -80,11 +65,11 @@ class FirstActivity : AppCompatActivity() {
                 fusedLocationClient .lastLocation.addOnCompleteListener{task ->
                     var location = task.result
                     if (location == null){
-                        getLastLocation()
+                        getNewLocation()
                     }else{
-                        //Toast.makeText(this,"Your latitude & longitude :"+location.latitude+" "+location.longitude,Toast.LENGTH_SHORT).show()
-                        var name:String=getCityName(location.latitude,location.longitude)
-
+                        save("lat",location.latitude.toString())
+                        save("lon",location.longitude.toString())
+                        getCityName(location.latitude,location.longitude)
                     }
                 }
 
@@ -153,20 +138,29 @@ class FirstActivity : AppCompatActivity() {
     private  val locationCallback = object  : LocationCallback(){
         override fun onLocationResult(p0: LocationResult) {
             var lastLocation =p0.lastLocation
-           // Toast.makeText(applicationContext,"Your latitude & longitude :"+lastLocation.latitude+" "+lastLocation.longitude,Toast.LENGTH_SHORT).show()
+            save("lat",lastLocation.latitude.toString())
+            save("lon",lastLocation.longitude.toString())
             getCityName(lastLocation.latitude,lastLocation.longitude)
+
         }
     }
 
-    private fun getCityName(lat:Double,long: Double):String {
+    private fun getCityName(lat:Double,long: Double) {
         var cityName=""
         var geoCoder=Geocoder(this, Locale.getDefault())
         var addr=geoCoder.getFromLocation(lat,long,1)
         cityName=addr.get(0).locality
         Toast.makeText(applicationContext,"your city :"+cityName,Toast.LENGTH_SHORT).show()
-        city=cityName;
+        save("city",cityName)
 
-        return cityName
+
+
+    }
+    private  fun save(key:String,value:String){
+        val  sharedPreferences=getSharedPreferences("weather",Context.MODE_PRIVATE)
+        var editor=sharedPreferences.edit()
+        editor.putString(key,value)
+        editor.commit()
 
     }
 }

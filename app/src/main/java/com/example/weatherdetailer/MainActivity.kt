@@ -1,5 +1,6 @@
 package com.example.weatherdetailer
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.viewpager.widget.ViewPager
@@ -27,7 +28,13 @@ class MainActivity : AppCompatActivity() {
         val name:String? =intent.getStringExtra("name")
         val city:String? =intent.getStringExtra("city")
 
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        val  sharedPreferences=getSharedPreferences("weather", Context.MODE_PRIVATE)
+        var editor=sharedPreferences.edit()
+        editor.clear()
 
     }
 }
