@@ -68,6 +68,7 @@ class CurrentFragment : Fragment() {
                                 "Temperature: "+weatherResponse.main!!.temp+"\n"+
                                 "Temperature(Min): "+weatherResponse.main!!.temp_min+"\n"+
                                 "Temperature(Max): "+weatherResponse.main!!.temp_max+"\n"+
+                                weatherResponse.weather!![0].description+"\n"
                                 "Humidity: "+weatherResponse.main!!.humudity+"\n"+
                                 "Pressure: "+weatherResponse.main!!.pressure
                         detailsTextView!!.text=stringBuilder
