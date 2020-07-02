@@ -2,14 +2,15 @@ package com.example.weatherdetailer
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentStatePagerAdapter
 
-class ViewPagerAdapter(supportFragmentManager: FragmentManager) : FragmentStatePagerAdapter(supportFragmentManager) {
-    private val fragmentList=ArrayList<Fragment>()
-    private val fragmentTitleList=ArrayList<String>()
+class ViewPagerAdapter(supportFragmentManager: FragmentManager) : FragmentPagerAdapter(supportFragmentManager) {
+    private val fragmentList:ArrayList<Fragment> = ArrayList()
+    private val fragmentTitleList: ArrayList<String> = ArrayList()
 
     override fun getItem(position: Int): Fragment {
-      return fragmentList.get(position)
+      return fragmentList[position]
     }
 
     override fun getCount(): Int {
