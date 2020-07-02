@@ -47,7 +47,7 @@ class SettingFragment : Fragment() {
                 editor.commit()
                 changeButton.text="Celsius"
             }
-            Toast.makeText(activity,"CLicked",Toast.LENGTH_SHORT).show()
+            //Toast.makeText(activity,"CLicked",Toast.LENGTH_SHORT).show()
         }
 
 

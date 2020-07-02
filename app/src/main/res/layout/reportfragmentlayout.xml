@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center">
@@ -13,7 +12,7 @@
         android:layout_marginStart="25dp"
         android:layout_marginLeft="25dp"
         android:layout_marginTop="15dp"
-        android:text="User:"
+        android:text="@string/user"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,7 +23,8 @@
         android:layout_marginStart="25dp"
         android:layout_marginLeft="25dp"
         android:layout_marginTop="15dp"
-        android:text="usernname"
+        android:text="@string/user_name"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/textView3"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -35,7 +35,8 @@
         android:layout_marginStart="75dp"
         android:layout_marginLeft="75dp"
         android:layout_marginTop="15dp"
-        android:text="City"
+        android:text="@string/city"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/usrnmeReport"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -59,7 +60,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="25dp"
                 android:scrollbars="vertical"
-                android:text="Report"
+                android:text="@string/report"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView3" />
         </LinearLayout>

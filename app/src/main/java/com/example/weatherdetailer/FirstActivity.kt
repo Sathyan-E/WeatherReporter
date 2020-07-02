@@ -31,9 +31,13 @@ class FirstActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_first)
 
+        //val  actionBar=supportActionBar
+        //actionBar!!.title="Weather Detailer"
+
         val userName=findViewById<EditText>(R.id.username)
         val nextButton=findViewById<Button>(R.id.button)
         val locateButton =findViewById<Button>(R.id.locationButton)
+
 
         nextButton.isEnabled=false
         nextButton.isClickable=false
@@ -150,7 +154,7 @@ class FirstActivity : AppCompatActivity() {
         var geoCoder=Geocoder(this, Locale.getDefault())
         var addr=geoCoder.getFromLocation(lat,long,1)
         cityName=addr.get(0).locality
-        Toast.makeText(applicationContext,"your city :"+cityName,Toast.LENGTH_SHORT).show()
+       // Toast.makeText(applicationContext,"your city :"+cityName,Toast.LENGTH_SHORT).show()
         save("city",cityName)
 
 

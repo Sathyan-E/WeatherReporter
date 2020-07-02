@@ -26,16 +26,13 @@ class CurrentFragment : Fragment() {
         return inflater.inflate(R.layout.currentfragmentlayout,container,false)
     }
 
-
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         
         val userTextView=view.findViewById<TextView>(R.id.userName)
         val cityTextView =view.findViewById<TextView>(R.id.cityname)
-        val tempTextView = view.findViewById<TextView>(R.id.temp)
+
         val detailsTextView = view.findViewById<TextView>(R.id.weather)
 
         val  sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)
@@ -44,13 +41,13 @@ class CurrentFragment : Fragment() {
         val lat:String? = sharedPreferences?.getString("lat",null)
         val lon:String? = sharedPreferences?.getString("lon",null)
         val unit:String? = sharedPreferences?.getString("unit",null)
-        Toast.makeText(activity,""+city,Toast.LENGTH_SHORT).show()
+
         userTextView.text=user
         cityTextView.text=city
 
         val retrofit=Retrofit.Builder().baseUrl("http://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
-
         val service = retrofit.create(WeatherService::class.java)
+
        if (unit=="celsius"){
            unitType="metric"
        }else if(unit=="farenheit"){
@@ -66,13 +63,12 @@ class CurrentFragment : Fragment() {
                         val weatherResponse=response.body()
                         val stringBuilder="Country :"+weatherResponse.sys!!.country+"\n"+
                                 "Temperature: "+weatherResponse.main!!.temp+"\n"+
-                                "Temperature(Min): "+weatherResponse.main!!.temp_min+"\n"+
-                                "Temperature(Max): "+weatherResponse.main!!.temp_max+"\n"+
+                                "Temperature(Min): "+weatherResponse.main!!.temp_min+unit+"\n"+
+                                "Temperature(Max): "+weatherResponse.main!!.temp_max+unit+"\n"+
                                 weatherResponse.weather!![0].description+"\n"
                                 "Humidity: "+weatherResponse.main!!.humudity+"\n"+
                                 "Pressure: "+weatherResponse.main!!.pressure
                         detailsTextView!!.text=stringBuilder
-
 
                     }
                 }
@@ -80,15 +76,11 @@ class CurrentFragment : Fragment() {
                     Toast.makeText(activity,"response is null",Toast.LENGTH_SHORT).show()
                 }
 
-
             }
 
             override fun onFailure(call: Call<WeatherResponse>?, t: Throwable) {
-                TODO("Not yet implemented")
                 detailsTextView!!.text=t.message
             }
         })
-        //Toast.makeText(activity,""+city,Toast.LENGTH_SHORT).show()
-
     }
 }

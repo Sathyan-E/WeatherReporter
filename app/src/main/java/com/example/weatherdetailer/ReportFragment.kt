@@ -43,7 +43,7 @@ class ReportFragment : Fragment() {
         val lon:String? = sharedPreferences?.getString("lon",null)
         val unit:String? = sharedPreferences?.getString("unit",null)
 
-        if(unit=="censius"){
+        if(unit=="celsius"){
             unitType="metric"
         }
         else if(unit=="farenheit"){
@@ -60,16 +60,16 @@ class ReportFragment : Fragment() {
 
         reportCall.enqueue(object : Callback<MonthlyResponse> {
             override fun onResponse(call: Call<MonthlyResponse>?, response: Response<MonthlyResponse>?) {
-                //TODO("Not yet implemented")
+
                 if (response!=null){
                     if (response.code()==200){
                         val weatherResponse=response.body()
                         val list=weatherResponse.list
-                        Toast.makeText(activity,"The length is "+list.size,Toast.LENGTH_SHORT).show()
+
                         var stringBuilder=StringBuilder()
                         var num:Int=0
                         for(i in list){
-                            stringBuilder.append( weatherResponse.list[num].date.toString()+" "+weatherResponse.list[num].weather[0].description+" "+ weatherResponse.list[num].main!!.temp_min+" "+unit+"\n")
+                            stringBuilder.append( weatherResponse.list[num].date.toString()+" - "+weatherResponse.list[num].weather[0].description+" - "+ weatherResponse.list[num].main!!.temp_min+" "+unit+"\n")
                             num++
                         }
                         reportTextView!!.text=stringBuilder
@@ -84,7 +84,7 @@ class ReportFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<MonthlyResponse>?, t: Throwable) {
-                //TODO("Not yet implemented")
+
                 reportTextView!!.text=t.message
             }
 
