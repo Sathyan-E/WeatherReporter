@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="citylist">
+            <item>None</item>
+            <item>Bangaluru</item>
+            <item>Coimbatore</item>
+            <item>Chennai</item>
+            <item>Nagappattinam</item>
+            <item>Vedaranyam</item>
+    </string-array>
+</resources>

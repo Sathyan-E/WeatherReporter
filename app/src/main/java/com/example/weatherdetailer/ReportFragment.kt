@@ -40,17 +40,14 @@ class ReportFragment : Fragment() {
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
 
-        val user: String? = sharedPreferences?.getString("name",null)
-        val city: String? = sharedPreferences?.getString("city",null)
-
-
+        val user: String? =getData(sharedPreferences,"name")
+        val city: String? = getData(sharedPreferences,"city")
 
         nameTextView.text=user
         cityTextView.text=city
 
-
         return view
-      sharedPreferences?.getString("unit",null).toString()
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
