@@ -1,34 +1,37 @@
 package com.example.weatherdetailer
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
+    lateinit var adapter: MyStateAdapter
+    lateinit var viewPager2: ViewPager2
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-      //  setSupportActionBar(toolbar);
 
-        val viewPager: ViewPager= findViewById(R.id.viewPager)
         val tablayout:TabLayout =findViewById(R.id.tabs)
-
-        val adapter=ViewPagerAdapter(supportFragmentManager)
-        adapter.addFragment(CurrentFragment(),"Current")
-        adapter.addFragment(DateFragment(),"Date")
-        adapter.addFragment(ReportFragment(),"Report")
-        adapter.addFragment(SettingFragment(),"Settings")
-        viewPager.adapter=adapter
-        tablayout.setupWithViewPager(viewPager)
-
-        val name:String? =intent.getStringExtra("name")
-        val city:String? =intent.getStringExtra("city")
+        adapter= MyStateAdapter(this)
+        viewPager2=findViewById(R.id.viewpager2)
+        viewPager2.adapter=adapter
+        val num= arrayOf("Current","Date","Report","Preference")
+        TabLayoutMediator(tablayout,viewPager2){tab, position ->
+            tab.text=num[position]
+        }.attach()
 
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -37,4 +40,5 @@ class MainActivity : AppCompatActivity() {
         editor.clear()
 
     }
+
 }

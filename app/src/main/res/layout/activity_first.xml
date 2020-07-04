@@ -19,20 +19,6 @@
         app:title="Weather Detailer" />
 
 
-    <Button
-        android:id="@+id/locationButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="133dp"
-        android:layout_marginLeft="133dp"
-        android:layout_marginTop="119dp"
-        android:layout_marginEnd="134dp"
-        android:layout_marginRight="134dp"
-        android:text="@string/get_my_location"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/nameText"

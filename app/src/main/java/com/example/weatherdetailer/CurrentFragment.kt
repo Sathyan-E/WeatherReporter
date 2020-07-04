@@ -1,6 +1,7 @@
 package com.example.weatherdetailer
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class CurrentFragment : Fragment() {
     var unitType=""
+    lateinit var detailsTextView:TextView
+    lateinit var sharedPreferences:SharedPreferences
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -33,26 +36,30 @@ class CurrentFragment : Fragment() {
         val userTextView=view.findViewById<TextView>(R.id.userName)
         val cityTextView =view.findViewById<TextView>(R.id.cityname)
 
-        val detailsTextView = view.findViewById<TextView>(R.id.weather)
+        detailsTextView = view.findViewById(R.id.weather)
 
-        val  sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)
+        sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
         val user: String? = sharedPreferences?.getString("name",null)
         val city: String? = sharedPreferences?.getString("city",null)
-        val lat:String? = sharedPreferences?.getString("lat",null)
-        val lon:String? = sharedPreferences?.getString("lon",null)
-        val unit:String? = sharedPreferences?.getString("unit",null)
 
         userTextView.text=user
         cityTextView.text=city
 
-        val retrofit=Retrofit.Builder().baseUrl("http://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
+
+    }
+    private fun findWeather(){
+        val lat:String? = getData(sharedPreferences,"lat")
+        val lon:String? =getData(sharedPreferences,"lon")
+        val unit:String? =getData(sharedPreferences,"unit")
+
+        val retrofit=Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = retrofit.create(WeatherService::class.java)
 
-       if (unit=="celsius"){
-           unitType="metric"
-       }else if(unit=="farenheit"){
-           unitType="imperial"
-       }
+        if (unit=="celsius"){
+            unitType="metric"
+        }else if(unit=="farenheit"){
+            unitType="imperial"
+        }
 
         val call = service.getCurrentWeatherData(lat.toString(),lon.toString(),"0458de72757b2f04185abd9a4b012488",unitType)
 
@@ -66,7 +73,7 @@ class CurrentFragment : Fragment() {
                                 "Temperature(Min): "+weatherResponse.main!!.temp_min+unit+"\n"+
                                 "Temperature(Max): "+weatherResponse.main!!.temp_max+unit+"\n"+
                                 weatherResponse.weather!![0].description+"\n"
-                                "Humidity: "+weatherResponse.main!!.humudity+"\n"+
+                        "Humidity: "+weatherResponse.main!!.humudity+"\n"+
                                 "Pressure: "+weatherResponse.main!!.pressure
                         detailsTextView!!.text=stringBuilder
 
@@ -83,4 +90,14 @@ class CurrentFragment : Fragment() {
             }
         })
     }
+
+    override fun onResume() {
+        super.onResume()
+        findWeather()
+    }
+    private  fun getData(shared:SharedPreferences,string: String): String? {
+        return shared?.getString(string,null)
+
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.example.weatherdetailer
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
@@ -20,38 +21,53 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class ReportFragment : Fragment() {
     var unitType=""
+    //var lat:String?=""
+    //var lon:String?=""
+    lateinit var sharedPreferences: SharedPreferences
+    //lateinit var unit:String
+    lateinit var reportTextView:TextView
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View?{
-        return inflater.inflate(R.layout.reportfragmentlayout,container,false)
+
+
+        val view= inflater.inflate(R.layout.reportfragmentlayout,container,false)
+        val nameTextView=view.findViewById<TextView>(R.id.usrnmeReport)
+        val cityTextView=view.findViewById<TextView>(R.id.city)
+        reportTextView = view.findViewById<TextView>(R.id.report)
+
+        sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
+
+        val user: String? = sharedPreferences?.getString("name",null)
+        val city: String? = sharedPreferences?.getString("city",null)
+
+
+
+        nameTextView.text=user
+        cityTextView.text=city
+
+
+        return view
+      sharedPreferences?.getString("unit",null).toString()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val nameTextView=view.findViewById<TextView>(R.id.usrnmeReport)
-        val cityTextView=view.findViewById<TextView>(R.id.city)
-        val reportTextView = view.findViewById<TextView>(R.id.report)
-        //reportTextView.movementMethod(ScrollingMovementMethod())
+    }
+    fun loadData(){
 
-        val  sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)
-        val user: String? = sharedPreferences?.getString("name",null)
-        val city: String? = sharedPreferences?.getString("city",null)
-        val lat:String? = sharedPreferences?.getString("lat",null)
-        val lon:String? = sharedPreferences?.getString("lon",null)
-        val unit:String? = sharedPreferences?.getString("unit",null)
-
+        val unit =getData(sharedPreferences,"unit")
+        val lat=getData(sharedPreferences,"lat")
+        val lon=getData(sharedPreferences,"lon")
         if(unit=="celsius"){
             unitType="metric"
         }
         else if(unit=="farenheit"){
             unitType="imperial"
         }
-
-        nameTextView.text=user
-        cityTextView.text=city
 
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
@@ -79,15 +95,22 @@ class ReportFragment : Fragment() {
                 }else{
                     Toast.makeText(activity,"Null Response Try Again",Toast.LENGTH_SHORT).show()
                 }
-
-
             }
 
             override fun onFailure(call: Call<MonthlyResponse>?, t: Throwable) {
-
                 reportTextView!!.text=t.message
             }
 
         })
+
     }
+
+    override fun onResume() {
+        super.onResume()
+        loadData()
+    }
+    private  fun getData(shared:SharedPreferences,string: String): String? {
+        return shared?.getString(string,null)
+    }
+
 }

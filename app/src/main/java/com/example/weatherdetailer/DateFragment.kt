@@ -15,6 +15,7 @@ import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import java.time.LocalDateTime
 import java.util.*
 
 class DateFragment : Fragment() {
@@ -29,12 +30,16 @@ class DateFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val nameTextView=view.findViewById<TextView>(R.id.usrnmeDate)
+       val nameTextView=view.findViewById<TextView>(R.id.usrnmeDate)
         val calendarView=view.findViewById<CalendarView>(R.id.calenderView)
+        val date=calendarView.date
+        Toast.makeText(activity,""+date.toString(),Toast.LENGTH_SHORT).show()
+
         calendarView?.setOnDateChangeListener{view,year,month,dayOfMonth ->
             val msg:String= dayOfMonth.toString() +"/"+(month+1)+"/"+year
-            Toast.makeText(activity,""+msg,Toast.LENGTH_SHORT).show()
+           // Toast.makeText(activity,""+msg,Toast.LENGTH_SHORT).show()
         }
+
 
 
         val  sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)

@@ -9,6 +9,8 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import kotlinx.android.synthetic.main.activity_main.*
 
 class SettingFragment : Fragment() {
     override fun onCreateView(
@@ -30,26 +32,30 @@ class SettingFragment : Fragment() {
         val user: String? = sharedPreferences?.getString("name",null)
 
         nameTextView.text=user
-
+        var unit: String? = sharedPreferences?.getString("unit",null)
+        changeButton.text=unit
         changeButton.setOnClickListener{
-            val unit: String? = sharedPreferences?.getString("unit",null)
+            unit= sharedPreferences?.getString("unit",null)
             if (unit=="celsius"){
-                var editor=sharedPreferences.edit()
+                var editor= sharedPreferences!!.edit()
                 editor.remove("unit")
                 editor.putString("unit","farenheit")
                 editor.commit()
                 changeButton.text="Farenheit"
+
             }
             else if (unit=="farenheit"){
-                var editor=sharedPreferences.edit()
+                var editor=sharedPreferences!!.edit()
                 editor.remove("unit")
                 editor.putString("unit","celsius")
                 editor.commit()
                 changeButton.text="Celsius"
             }
-            //Toast.makeText(activity,"CLicked",Toast.LENGTH_SHORT).show()
+
         }
 
 
     }
+
+
 }

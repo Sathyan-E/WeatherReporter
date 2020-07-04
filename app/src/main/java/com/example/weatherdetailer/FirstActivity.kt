@@ -36,29 +36,35 @@ class FirstActivity : AppCompatActivity() {
 
         val userName=findViewById<EditText>(R.id.username)
         val nextButton=findViewById<Button>(R.id.button)
-        val locateButton =findViewById<Button>(R.id.locationButton)
+      //  val locateButton =findViewById<Button>(R.id.locationButton)
 
 
-        nextButton.isEnabled=false
-        nextButton.isClickable=false
+        //nextButton.isEnabled=false
+        //nextButton.isClickable=false
         fusedLocationClient=LocationServices.getFusedLocationProviderClient(this)
-        locateButton.setOnClickListener {
-            city=getLastLocation()
+       /** locateButton.setOnClickListener {
+
             //Toast.makeText(this,""+city,Toast.LENGTH_SHORT).show()
             nextButton.isEnabled=true
             nextButton.isClickable=true
         }
+       **/
 
 
         nextButton.setOnClickListener {
             val usrName = userName.text.toString()
+            if (userName.length()!=0){
+                val  intent = Intent(this@FirstActivity,MainActivity::class.java).apply {
+                    city=getLastLocation()
+                    save("name",usrName)
+                    save("unit","celsius")
 
-            val  intent = Intent(this@FirstActivity,MainActivity::class.java).apply {
-                save("name",usrName)
-                save("unit","celsius")
-
+                }
+                startActivity(intent)
+            }else{
+                Toast.makeText(this,"Enter Your Name",Toast.LENGTH_SHORT).show()
             }
-            startActivity(intent)
+
         }
     }
 
