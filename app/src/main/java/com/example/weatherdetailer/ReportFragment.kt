@@ -10,6 +10,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.weatherdetailer.adapter.ReportViewAdapter
 import com.example.weatherdetailer.network.MonthlyResponse
 import com.example.weatherdetailer.network.WeatherResponse
 import com.example.weatherdetailer.network.WeatherService
@@ -21,11 +24,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class ReportFragment : Fragment() {
     var unitType=""
-    //var lat:String?=""
-    //var lon:String?=""
     lateinit var sharedPreferences: SharedPreferences
-    //lateinit var unit:String
     lateinit var reportTextView:TextView
+    private var responseList:MutableList<WeatherResponse> = ArrayList()
+    private lateinit var recyclerView: RecyclerView
+    private var recyclerAdapter: ReportViewAdapter? =null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,6 +39,11 @@ class ReportFragment : Fragment() {
         val view= inflater.inflate(R.layout.reportfragmentlayout,container,false)
         val nameTextView=view.findViewById<TextView>(R.id.usrnmeReport)
         val cityTextView=view.findViewById<TextView>(R.id.city)
+        recyclerView=view.findViewById(R.id.recyclerview)
+        recyclerView.layoutManager=LinearLayoutManager(context)
+        recyclerAdapter= ReportViewAdapter(responseList,R.layout.reportlayoutitem)
+        recyclerView.adapter=recyclerAdapter
+
         reportTextView = view.findViewById<TextView>(R.id.report)
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
@@ -79,13 +87,17 @@ class ReportFragment : Fragment() {
                         val weatherResponse=response.body()
                         val list=weatherResponse.list
 
+                        responseList.addAll(list)
+                        recyclerAdapter!!.notifyDataSetChanged()
+
+
                         var stringBuilder=StringBuilder()
                         var num:Int=0
                         for(i in list){
                             stringBuilder.append( weatherResponse.list[num].date.toString()+" - "+weatherResponse.list[num].weather[0].description+" - "+ weatherResponse.list[num].main!!.temp_min+" "+unit+"\n")
                             num++
                         }
-                        reportTextView!!.text=stringBuilder
+                        //reportTextView!!.text=stringBuilder
 
                     }
 

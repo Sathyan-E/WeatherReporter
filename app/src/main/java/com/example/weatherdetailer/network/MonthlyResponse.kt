@@ -14,5 +14,4 @@ class MonthlyResponse {
     @SerializedName("city")
     var city:City?=null
 
-
 }
