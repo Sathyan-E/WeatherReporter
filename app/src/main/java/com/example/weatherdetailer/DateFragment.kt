@@ -15,6 +15,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherdetailer.adapter.DateForecastAdapter
 import com.example.weatherdetailer.adapter.DatePastDataAdapter
 import com.example.weatherdetailer.network.*
+import com.google.android.gms.common.api.Status
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,22 +33,28 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
-class DateFragment : Fragment(),AdapterView.OnItemSelectedListener {
+class DateFragment : Fragment() {
    lateinit var calendarView: CalendarView
     private lateinit var unitType:String
     private lateinit var weather:TextView
     var  m:String=""
-    var selectedItem:String=""
+    var selectedLat:String=""
+    var selectedlon:String=""
+    var selectedDate:String=""
     lateinit var sharedPreferences: SharedPreferences
     var firstTime:Boolean=true
-    var future:Boolean=false
+    var isfuture:Boolean=false
+    var isPast:Boolean=false
     var isDateChanged:Boolean=false
+    var isPlaceSelected:Boolean=false
     private var currentTime:Long=0
     private var responseList:MutableList<WeatherResponse> = ArrayList()
     private lateinit var recyclerView: RecyclerView
     private var dateAdapter: DateForecastAdapter?=null
     private var pastDataAdapter:DatePastDataAdapter?=null
     private var historyDataList:MutableList<Current> = ArrayList()
+    private lateinit var autocompleteSupportFragment:AutocompleteSupportFragment
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,30 +66,23 @@ class DateFragment : Fragment(),AdapterView.OnItemSelectedListener {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-/**
-        context?.let { Places.initialize(it,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k") }
-        var placesClient= context?.let { Places.createClient(it) }
-**/
+
+        Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
+        var placesClient=Places.createClient(context!!)
+
+
+        autocompleteSupportFragment=childFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
+        autocompleteSupportFragment.setTypeFilter(TypeFilter.CITIES)
+        autocompleteSupportFragment.setPlaceFields(listOf(Place.Field.ID,Place.Field.LAT_LNG,Place.Field.NAME) )
         recyclerView=view.findViewById(R.id.recycler)
         recyclerView.layoutManager=LinearLayoutManager(context)
+
 
         dateAdapter= DateForecastAdapter(responseList,R.layout.datefragment_forecast_item)
         pastDataAdapter= DatePastDataAdapter(historyDataList,R.layout.datefragment_pastdata_item)
 
-
-       val nameTextView=view.findViewById<TextView>(R.id.usrnmeDate)
+        val nameTextView=view.findViewById<TextView>(R.id.usrnmeDate)
         calendarView=view.findViewById<CalendarView>(R.id.calenderView)
-        val spinner:Spinner=view.findViewById(R.id.citySpinner)
-
-
-
-        spinner.onItemSelectedListener=this
-        ArrayAdapter.createFromResource(
-                context!!,R.array.citylist,android.R.layout.simple_spinner_item).also { arrayAdapter ->
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter=arrayAdapter
-        }
-
 
         val date=calendarView.date
         val min=date-432000000
@@ -106,25 +111,35 @@ class DateFragment : Fragment(),AdapterView.OnItemSelectedListener {
 
             val l=LocalDate.parse(m, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             val unix=l.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-          //  Toast.makeText(activity,"Future"+unix,Toast.LENGTH_LONG).show()
+
             if(unix>currentTime){
-                future=true
+                isfuture=true
+                isPast=false
                 recyclerView.adapter=dateAdapter
+                if (isPlaceSelected==true){
+
+                }
                 Toast.makeText(activity,"Future",Toast.LENGTH_LONG).show()
             }
             if(unix<currentTime){
                 Toast.makeText(activity,"Past"+unix,Toast.LENGTH_LONG).show()
-                future=false
+                isfuture=false
+                isPast=true
                 recyclerView.adapter=pastDataAdapter
 
             }
             isDateChanged=true
 
-            // val msg:String= year.toString()+"-"+(month+1)+"-"+dayOfMonth
-            //Toast.makeText(activity,""+m,Toast.LENGTH_LONG).show()
-
         }
+        autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(p0: Place) {
+                Toast.makeText(activity,"Place selected"+p0.name+" "+p0.latLng!!.latitude+" "+p0.latLng!!.longitude,Toast.LENGTH_SHORT).show()
+            }
 
+            override fun onError(p0: Status) {
+                Toast.makeText(activity,"Error:$p0",Toast.LENGTH_SHORT).show()
+            }
+        })
 
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
@@ -132,7 +147,7 @@ class DateFragment : Fragment(),AdapterView.OnItemSelectedListener {
         nameTextView.text=user
 
     }
-
+/**
     override fun onNothingSelected(p0: AdapterView<*>?) {
 
     }
@@ -140,12 +155,10 @@ class DateFragment : Fragment(),AdapterView.OnItemSelectedListener {
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
 
         if (p0!!.getItemAtPosition(p2).toString()!="None"){
-           // Toast.makeText(activity,""+p0!!.getItemAtPosition(p2).toString(),Toast.LENGTH_SHORT).show()
             selectedItem=p0.getItemAtPosition(p2).toString()
             Toast.makeText(activity,"selected"+selectedItem,Toast.LENGTH_SHORT).show()
             if(isDateChanged==true){
                 if(future==true){
-
                     forecast(selectedItem,m)
                 }
                 else{
@@ -157,17 +170,17 @@ class DateFragment : Fragment(),AdapterView.OnItemSelectedListener {
                 val format:SimpleDateFormat=SimpleDateFormat("yyyy-MM-dd")
                 var day1=format.format(c)
                 forecast(selectedItem,day1)
-
-
             }
 
         }
 
     }
+    **/
 
     override fun onResume() {
         super.onResume()
-        //Toast.makeText(activity,""+date.toString(),Toast.LENGTH_LONG).show()
+
+
 
     }
 
@@ -182,6 +195,7 @@ class DateFragment : Fragment(),AdapterView.OnItemSelectedListener {
         else if(unit=="farenheit"){
             unitType="imperial"
         }
+
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
 
@@ -208,10 +222,9 @@ class DateFragment : Fragment(),AdapterView.OnItemSelectedListener {
 
                             num++
                         }
+
                         responseList.addAll(array)
                         dateAdapter!!.notifyDataSetChanged()
-                        //Toast.makeText()
-                       // weatherTextView!!.text=stringBuilder
 
                     }
 

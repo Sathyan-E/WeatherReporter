@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         val  sharedPreferences=getSharedPreferences("weather", Context.MODE_PRIVATE)
         var editor=sharedPreferences.edit()
         editor.clear()
+        editor.apply()
 
     }
 
