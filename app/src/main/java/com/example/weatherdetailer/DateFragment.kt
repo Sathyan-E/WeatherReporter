@@ -122,7 +122,7 @@ class DateFragment : Fragment() {
             if(unix>currentTime){
                 isfuture=true
                 isPast=false
-                recyclerView.adapter=dateAdapter currentDataTextview.text=m+" "+selectedCity
+                recyclerView.adapter=dateAdapter
                 if (isPlaceSelected==true){
 
                     loadForecast(selectedLat,selectedlon,m)
