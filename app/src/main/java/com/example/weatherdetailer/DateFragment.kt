@@ -56,6 +56,8 @@ class DateFragment : Fragment() {
     private var historyDataList:MutableList<Current> = ArrayList()
     private lateinit var autocompleteSupportFragment:AutocompleteSupportFragment
      lateinit var currentDataTextview:TextView
+    var lastUpdate:Int=-1
+    var lastunitPreference:String=""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -183,13 +185,22 @@ class DateFragment : Fragment() {
     }
     override fun onResume() {
         super.onResume()
+        val unitPreference=getData(sharedPreferences,"unit")
+        if(unitPreference!=lastunitPreference){
+            when(lastUpdate){
+                0 -> loadPastData(selectedLat,selectedlon,selectedDate)
+                1 -> loadCurrentData(selectedLat,selectedlon)
+                2->loadForecast(selectedLat,selectedlon,m)
+            }
+        }
     }
 
 
     private  fun loadForecast(lat: String,lng:String, day:String){
-
-        currentDataTextview.text=m+" "+selectedCity
+        lastUpdate=2
+        currentDataTextview.text="Date :"+m+" "+"Location: "+selectedCity
         val unit =getData(sharedPreferences,"unit")
+        lastunitPreference=unit!!
 
         if(unit=="celsius"){
             unitType="metric"
@@ -250,8 +261,10 @@ class DateFragment : Fragment() {
         return shared.getString(string,null)
     }
     private  fun loadPastData(lat:String,lon:String,dt:String){
-        currentDataTextview.text=m+" "+selectedCity
+        lastUpdate=0
+        currentDataTextview.text="Date :"+m+" "+"Location: "+selectedCity
         val unit =getData(sharedPreferences,"unit")
+        lastunitPreference=unit!!
 
         if(unit=="celsius"){
             unitType="metric"
@@ -306,7 +319,9 @@ class DateFragment : Fragment() {
 
     }
     private fun loadCurrentData(lat:String,lng:String){
+        lastUpdate=1
         val unit =getData(sharedPreferences,"unit")
+        lastunitPreference=unit!!
 
         if(unit=="celsius"){
             unitType="metric"

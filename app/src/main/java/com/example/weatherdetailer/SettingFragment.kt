@@ -57,5 +57,9 @@ class SettingFragment : Fragment() {
 
     }
 
+    override fun onPause() {
+        super.onPause()
+    }
+
 
 }

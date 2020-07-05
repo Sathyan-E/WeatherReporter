@@ -35,7 +35,6 @@ class ReportFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View?{
 
-
         val view= inflater.inflate(R.layout.reportfragmentlayout,container,false)
         val nameTextView=view.findViewById<TextView>(R.id.usrnmeReport)
         val cityTextView=view.findViewById<TextView>(R.id.city)
@@ -62,17 +61,10 @@ class ReportFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
     }
-    fun loadData(){
+    private fun loadData(){
 
-        val unit =getData(sharedPreferences,"unit")
         val lat=getData(sharedPreferences,"lat")
         val lon=getData(sharedPreferences,"lon")
-        if(unit=="celsius"){
-            unitType="metric"
-        }
-        else if(unit=="farenheit"){
-            unitType="imperial"
-        }
 
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
@@ -85,19 +77,10 @@ class ReportFragment : Fragment() {
                 if (response!=null){
                     if (response.code()==200){
                         val weatherResponse=response.body()
+                        responseList.clear()
                         val list=weatherResponse.list
-
                         responseList.addAll(list)
                         recyclerAdapter!!.notifyDataSetChanged()
-
-
-                        var stringBuilder=StringBuilder()
-                        var num:Int=0
-                        for(i in list){
-                            stringBuilder.append( weatherResponse.list[num].date.toString()+" - "+weatherResponse.list[num].weather[0].description+" - "+ weatherResponse.list[num].main!!.temp_min+" "+unit+"\n")
-                            num++
-                        }
-                        //reportTextView!!.text=stringBuilder
 
                     }
 
@@ -116,6 +99,14 @@ class ReportFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        val unit =getData(sharedPreferences,"unit")
+        if(unit=="celsius"){
+            unitType="metric"
+        }
+        else if(unit=="farenheit"){
+            unitType="imperial"
+        }
+
         loadData()
     }
     private  fun getData(shared:SharedPreferences,string: String): String? {
