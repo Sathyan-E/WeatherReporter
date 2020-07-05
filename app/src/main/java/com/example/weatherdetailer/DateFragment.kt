@@ -16,6 +16,7 @@ import com.example.weatherdetailer.adapter.DateForecastAdapter
 import com.example.weatherdetailer.adapter.DatePastDataAdapter
 import com.example.weatherdetailer.network.*
 import com.google.android.gms.common.api.Status
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.TypeFilter
@@ -42,7 +43,7 @@ class DateFragment : Fragment() {
     var selectedlon:String=""
     var selectedDate:String=""
     lateinit var sharedPreferences: SharedPreferences
-    var firstTime:Boolean=true
+    lateinit var   selectedCity:String
     var isfuture:Boolean=false
     var isPast:Boolean=false
     var isDateChanged:Boolean=false
@@ -54,6 +55,7 @@ class DateFragment : Fragment() {
     private var pastDataAdapter:DatePastDataAdapter?=null
     private var historyDataList:MutableList<Current> = ArrayList()
     private lateinit var autocompleteSupportFragment:AutocompleteSupportFragment
+     lateinit var currentDataTextview:TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,6 +68,8 @@ class DateFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        currentDataTextview=view.findViewById(R.id.data_type)
 
         Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
         var placesClient=Places.createClient(context!!)
@@ -87,8 +91,8 @@ class DateFragment : Fragment() {
         val date=calendarView.date
         val min=date-432000000
         val max=date+432000000
-        currentTime=System.currentTimeMillis()
-        Toast.makeText(activity,""+currentTime,Toast.LENGTH_LONG).show()
+
+
 
 
         calendarView.minDate=min
@@ -111,29 +115,59 @@ class DateFragment : Fragment() {
 
             val l=LocalDate.parse(m, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             val unix=l.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-
+            currentTime=System.currentTimeMillis()
+            //Toast.makeText(activity,""+currentTime,Toast.LENGTH_LONG).show()
+            isDateChanged=true
+            selectedDate=(unix/1000).toString()
             if(unix>currentTime){
                 isfuture=true
                 isPast=false
-                recyclerView.adapter=dateAdapter
+                recyclerView.adapter=dateAdapter currentDataTextview.text=m+" "+selectedCity
                 if (isPlaceSelected==true){
 
+                    loadForecast(selectedLat,selectedlon,m)
+                }else{
+                    Toast.makeText(activity,"Select the place",Toast.LENGTH_SHORT).show()
                 }
-                Toast.makeText(activity,"Future",Toast.LENGTH_LONG).show()
+                //Toast.makeText(activity,"Future",Toast.LENGTH_LONG).show()
             }
-            if(unix<currentTime){
-                Toast.makeText(activity,"Past"+unix,Toast.LENGTH_LONG).show()
+            else if (unix<currentTime){
+                //Toast.makeText(activity,"Past"+unix,Toast.LENGTH_LONG).show()
                 isfuture=false
                 isPast=true
                 recyclerView.adapter=pastDataAdapter
+                if (isPlaceSelected==true){
+                   // currentDataTextview.text=m+" "+selectedCity
+                    loadPastData(selectedLat,selectedlon,selectedDate)
+                }
+                else{
+                    Toast.makeText(activity,"Select the place",Toast.LENGTH_SHORT).show()
+                }
+
 
             }
-            isDateChanged=true
+
 
         }
         autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(p0: Place) {
                 Toast.makeText(activity,"Place selected"+p0.name+" "+p0.latLng!!.latitude+" "+p0.latLng!!.longitude,Toast.LENGTH_SHORT).show()
+                selectedLat=p0.latLng!!.latitude.toString()
+                selectedlon=p0.latLng!!.longitude.toString()
+                selectedCity= p0.name.toString()
+                isPlaceSelected=true
+                if(isDateChanged==false){
+                    Toast.makeText(activity,"status change of date"+isDateChanged,Toast.LENGTH_SHORT).show()
+                    loadCurrentData(selectedLat,selectedlon)
+                }else if(isDateChanged){
+                    if(isPast){
+                        loadPastData(selectedLat,selectedlon,selectedDate)
+                    }else if(isfuture){
+                        loadForecast(selectedLat,selectedlon,m)
+                    }
+                }
+
+
             }
 
             override fun onError(p0: Status) {
@@ -147,46 +181,14 @@ class DateFragment : Fragment() {
         nameTextView.text=user
 
     }
-/**
-    override fun onNothingSelected(p0: AdapterView<*>?) {
-
-    }
-
-    override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-
-        if (p0!!.getItemAtPosition(p2).toString()!="None"){
-            selectedItem=p0.getItemAtPosition(p2).toString()
-            Toast.makeText(activity,"selected"+selectedItem,Toast.LENGTH_SHORT).show()
-            if(isDateChanged==true){
-                if(future==true){
-                    forecast(selectedItem,m)
-                }
-                else{
-                    loadPastData()
-                }
-
-            }else{
-                val c:Date=Calendar.getInstance().time
-                val format:SimpleDateFormat=SimpleDateFormat("yyyy-MM-dd")
-                var day1=format.format(c)
-                forecast(selectedItem,day1)
-            }
-
-        }
-
-    }
-    **/
-
     override fun onResume() {
         super.onResume()
-
-
-
     }
 
 
-    private  fun forecast(name:String, day:String){
+    private  fun loadForecast(lat: String,lng:String, day:String){
 
+        currentDataTextview.text=m+" "+selectedCity
         val unit =getData(sharedPreferences,"unit")
 
         if(unit=="celsius"){
@@ -199,7 +201,7 @@ class DateFragment : Fragment() {
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
 
-        val reportCall = service.getForecast(name,"0458de72757b2f04185abd9a4b012488",unitType)
+        val reportCall = service.getForecast(lat,lng,"0458de72757b2f04185abd9a4b012488",unitType)
 
         reportCall.enqueue(object : Callback<MonthlyResponse> {
             override fun onResponse(call: Call<MonthlyResponse>?, response: Response<MonthlyResponse>?) {
@@ -209,14 +211,15 @@ class DateFragment : Fragment() {
                         val weatherResponse=response.body()
                         val list=weatherResponse.list
 
-                        var stringBuilder=StringBuilder()
+                       // var stringBuilder=StringBuilder()
+                        responseList.clear()
                         var num:Int=0
                         var array:ArrayList<WeatherResponse> = ArrayList()
                         for(i in list){
-                            var dateString:String=weatherResponse.list[num].date.toString().substring(0,10)
+                            val dateString:String=weatherResponse.list[num].date.toString().substring(0,10)
                             if(day==dateString){
                                 Toast.makeText(activity,"date checking works",Toast.LENGTH_SHORT).show()
-                                stringBuilder.append( weatherResponse.list[num].date.toString()+" - "+weatherResponse.list[num].weather[0].description+" - "+ weatherResponse.list[num].main!!.temp_min+" "+unit+"\n")
+                              //  stringBuilder.append( weatherResponse.list[num].date.toString()+" - "+weatherResponse.list[num].weather[0].description+" - "+ weatherResponse.list[num].main!!.temp_min+" "+unit+"\n")
                                 array.add(weatherResponse.list[num])
                             }
 
@@ -235,6 +238,7 @@ class DateFragment : Fragment() {
 
             override fun onFailure(call: Call<MonthlyResponse>?, t: Throwable) {
               //  weatherTextView!!.text=t.message
+                Toast.makeText(activity,""+t.message,Toast.LENGTH_SHORT).show()
             }
 
         })
@@ -245,7 +249,8 @@ class DateFragment : Fragment() {
     private  fun getData(shared:SharedPreferences,string: String): String? {
         return shared.getString(string,null)
     }
-    private  fun loadPastData(){
+    private  fun loadPastData(lat:String,lon:String,dt:String){
+        currentDataTextview.text=m+" "+selectedCity
         val unit =getData(sharedPreferences,"unit")
 
         if(unit=="celsius"){
@@ -255,9 +260,9 @@ class DateFragment : Fragment() {
             unitType="imperial"
         }
 
-        val lat:String="12.97"
-        val lon:String="77.5946"
-        val dt:String="1593697928"
+       // val lat:String="12.97"
+        //val lon:String="77.5946"
+        //val dt:String="1593697928"
         val appid:String="0458de72757b2f04185abd9a4b012488"
 
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
@@ -277,8 +282,10 @@ class DateFragment : Fragment() {
                 if (response!=null){
                     if (response.code()==200){
                         val pastResponse=response.body()
+                        
                         val array=pastResponse.hourly_update
                         var sbuilder=StringBuilder()
+                        historyDataList.clear()
                        // sbuilder.append(pastResponse.current!!.temp.toString()+" "+pastResponse.current!!.weather[0].main+" "+pastResponse.current!!.weather[0].description)
                        // sbuilder.append(pastResponse.lat.toString())
                         //weatherTextView.text=sbuilder
@@ -296,6 +303,50 @@ class DateFragment : Fragment() {
             }
 
         })
+
+    }
+    private fun loadCurrentData(lat:String,lng:String){
+        val unit =getData(sharedPreferences,"unit")
+
+        if(unit=="celsius"){
+            unitType="metric"
+        }
+        else if(unit=="farenheit"){
+            unitType="imperial"
+        }
+
+        val retrofit=Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
+        val service = retrofit.create(WeatherService::class.java)
+
+        val call = service.getCurrentWeatherData(lat,lng,"0458de72757b2f04185abd9a4b012488",unitType)
+
+        call.enqueue(object : Callback<WeatherResponse> {
+            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>?) {
+                if (response!=null){
+                    if (response.code() == 200){
+                        val weatherResponse=response.body()
+                        val stringBuilder="Country :"+weatherResponse.sys!!.country+"\n"+
+                                "Temperature: "+weatherResponse.main!!.temp+"\n"+
+                                "Temperature(Min): "+weatherResponse.main!!.temp_min+unit+"\n"+
+                                "Temperature(Max): "+weatherResponse.main!!.temp_max+unit+"\n"+
+                                weatherResponse.weather!![0].description+"\n"
+                        "Humidity: "+weatherResponse.main!!.humudity+"\n"+
+                                "Pressure: "+weatherResponse.main!!.pressure
+                        currentDataTextview.text=stringBuilder
+
+                    }
+                }
+                else{
+                    Toast.makeText(activity,"response is null",Toast.LENGTH_SHORT).show()
+                }
+
+            }
+
+            override fun onFailure(call: Call<WeatherResponse>?, t: Throwable) {
+                currentDataTextview.text=t.message
+            }
+        })
+
 
     }
 

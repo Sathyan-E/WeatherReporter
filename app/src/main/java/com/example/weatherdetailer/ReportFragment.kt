@@ -77,7 +77,7 @@ class ReportFragment : Fragment() {
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
 
-        val reportCall = service.getMonthlyReport(lat.toString(),lon.toString(),"0458de72757b2f04185abd9a4b012488",unitType)
+        val reportCall = service.getForecast(lat.toString(),lon.toString(),"0458de72757b2f04185abd9a4b012488",unitType)
 
         reportCall.enqueue(object : Callback<MonthlyResponse> {
             override fun onResponse(call: Call<MonthlyResponse>?, response: Response<MonthlyResponse>?) {
