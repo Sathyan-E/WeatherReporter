@@ -1,26 +1,43 @@
 package com.example.weatherdetailer
 
+import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import com.example.weatherdetailer.network.WeatherResponse
 import com.example.weatherdetailer.network.WeatherService
+import com.google.android.gms.location.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
 
 class CurrentFragment : Fragment() {
     var unitType=""
     lateinit var detailsTextView:TextView
+    lateinit var cityTextView:TextView
     lateinit var sharedPreferences:SharedPreferences
+    private val PERMISSION_ID=1000
+    lateinit var fusedLocationClient : FusedLocationProviderClient
+    lateinit var locationRequest: LocationRequest
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -34,22 +51,18 @@ class CurrentFragment : Fragment() {
 
         
         val userTextView=view.findViewById<TextView>(R.id.userName)
-        val cityTextView =view.findViewById<TextView>(R.id.cityname)
+        cityTextView =view.findViewById<TextView>(R.id.cityname)
 
         detailsTextView = view.findViewById(R.id.weather)
+        fusedLocationClient= LocationServices.getFusedLocationProviderClient(activity!!)
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
         val user: String? = sharedPreferences?.getString("name",null)
-        val city: String? = sharedPreferences?.getString("city",null)
-
         userTextView.text=user
-        cityTextView.text=city
 
 
     }
-    private fun findWeather(){
-        val lat:String? = getData(sharedPreferences,"lat")
-        val lon:String? =getData(sharedPreferences,"lon")
+    private fun findWeather(lat:String,lon:String){
         val unit:String? =getData(sharedPreferences,"unit")
 
         val retrofit=Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
@@ -61,7 +74,7 @@ class CurrentFragment : Fragment() {
             unitType="imperial"
         }
 
-        val call = service.getCurrentWeatherData(lat.toString(),lon.toString(),"0458de72757b2f04185abd9a4b012488",unitType)
+        val call = service.getCurrentWeatherData(lat,lon,"0458de72757b2f04185abd9a4b012488",unitType)
 
         call.enqueue(object : Callback<WeatherResponse> {
             override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>?) {
@@ -93,11 +106,111 @@ class CurrentFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        findWeather()
+        val isConnected=isInternetConnected()
+        if (isConnected){
+            getLastLocation()
+        }else{
+            Toast.makeText(activity,"Turn On Internet Connection!",Toast.LENGTH_SHORT).show()
+        }
+
     }
     private  fun getData(shared:SharedPreferences,string: String): String? {
         return shared?.getString(string,null)
 
     }
+    private fun isInternetConnected():Boolean{
+        val cm= context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork:NetworkInfo?=cm.activeNetworkInfo
+        val isConnected:Boolean=activeNetwork?.isConnectedOrConnecting==true
+        return isConnected
+    }
+    private fun checkPermission():Boolean{
+        if (
+                ActivityCompat.checkSelfPermission(context!!,android.Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(context!!,Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ){
+            return true
+        }
+        return false
+    }
+
+    private  fun requestPermission(){
+        ActivityCompat.requestPermissions(
+                activity!!,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),PERMISSION_ID
+        )
+    }
+
+    private  fun isLocationEnabled():Boolean{
+        var locationManager=activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+    private  fun getLastLocation():String{
+        var name:String=""
+        if(checkPermission()){
+            if (isLocationEnabled()){
+                fusedLocationClient .lastLocation.addOnCompleteListener{task ->
+                    var location = task.result
+                    if (location == null){
+                        getNewLocation()
+                    }else{
+                        getCityName(location.latitude,location.longitude)
+                        findWeather(location.latitude.toString(),location.longitude.toString())
+                    }
+                }
+
+            }else{
+                Toast.makeText(activity,"Please Enable Your Location Service!",Toast.LENGTH_SHORT).show()
+            }
+
+        }else{
+            requestPermission()
+        }
+        return name
+    }
+    private  fun getNewLocation(){
+        locationRequest= LocationRequest()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval=0
+        locationRequest.fastestInterval=0
+        locationRequest.numUpdates=2
+        if (ActivityCompat.checkSelfPermission(activity!!, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity!!, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(activity,"Problem in getting location permission",Toast.LENGTH_SHORT).show()
+            return
+        }
+        fusedLocationClient!!.requestLocationUpdates(
+                locationRequest,locationCallback, Looper.myLooper()
+        )
+    }
+
+    private  val locationCallback = object  : LocationCallback(){
+        override fun onLocationResult(p0: LocationResult) {
+            var lastLocation =p0.lastLocation
+            getCityName(lastLocation.latitude,lastLocation.longitude)
+            findWeather(lastLocation.latitude.toString(),lastLocation.longitude.toString())
+
+        }
+    }
+    private fun getCityName(lat:Double,long: Double) {
+        var cityName=""
+        var geoCoder= Geocoder(activity, Locale.getDefault())
+        var addr=geoCoder.getFromLocation(lat,long,1)
+        cityName=addr.get(0).locality
+        cityTextView.text=cityName
+    }
+    private  fun save(key:String,value:String){
+        val  sharedPreferences=activity!!.getSharedPreferences("weather",Context.MODE_PRIVATE)
+        var editor=sharedPreferences.edit()
+        editor.putString(key,value)
+        editor.commit()
+
+    }
+
+
+
+
+
+
+
 
 }

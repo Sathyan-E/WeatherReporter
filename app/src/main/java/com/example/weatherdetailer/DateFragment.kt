@@ -75,8 +75,7 @@ class DateFragment : Fragment() {
 
         Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
         var placesClient=Places.createClient(context!!)
-
-
+        
         autocompleteSupportFragment=childFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
         autocompleteSupportFragment.setTypeFilter(TypeFilter.CITIES)
         autocompleteSupportFragment.setPlaceFields(listOf(Place.Field.ID,Place.Field.LAT_LNG,Place.Field.NAME) )
@@ -93,9 +92,6 @@ class DateFragment : Fragment() {
         val date=calendarView.date
         val min=date-432000000
         val max=date+432000000
-
-
-
 
         calendarView.minDate=min
         calendarView.maxDate=max
@@ -118,7 +114,6 @@ class DateFragment : Fragment() {
             val l=LocalDate.parse(m, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             val unix=l.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             currentTime=System.currentTimeMillis()
-            //Toast.makeText(activity,""+currentTime,Toast.LENGTH_LONG).show()
             isDateChanged=true
             selectedDate=(unix/1000).toString()
             if(unix>currentTime){
@@ -131,15 +126,13 @@ class DateFragment : Fragment() {
                 }else{
                     Toast.makeText(activity,"Select the place",Toast.LENGTH_SHORT).show()
                 }
-                //Toast.makeText(activity,"Future",Toast.LENGTH_LONG).show()
             }
             else if (unix<currentTime){
-                //Toast.makeText(activity,"Past"+unix,Toast.LENGTH_LONG).show()
+
                 isfuture=false
                 isPast=true
                 recyclerView.adapter=pastDataAdapter
                 if (isPlaceSelected==true){
-                   // currentDataTextview.text=m+" "+selectedCity
                     loadPastData(selectedLat,selectedlon,selectedDate)
                 }
                 else{
@@ -222,7 +215,6 @@ class DateFragment : Fragment() {
                         val weatherResponse=response.body()
                         val list=weatherResponse.list
 
-                       // var stringBuilder=StringBuilder()
                         responseList.clear()
                         var num:Int=0
                         var array:ArrayList<WeatherResponse> = ArrayList()
@@ -230,13 +222,10 @@ class DateFragment : Fragment() {
                             val dateString:String=weatherResponse.list[num].date.toString().substring(0,10)
                             if(day==dateString){
                                 Toast.makeText(activity,"date checking works",Toast.LENGTH_SHORT).show()
-                              //  stringBuilder.append( weatherResponse.list[num].date.toString()+" - "+weatherResponse.list[num].weather[0].description+" - "+ weatherResponse.list[num].main!!.temp_min+" "+unit+"\n")
                                 array.add(weatherResponse.list[num])
                             }
-
                             num++
                         }
-
                         responseList.addAll(array)
                         dateAdapter!!.notifyDataSetChanged()
 
@@ -248,7 +237,6 @@ class DateFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<MonthlyResponse>?, t: Throwable) {
-              //  weatherTextView!!.text=t.message
                 Toast.makeText(activity,""+t.message,Toast.LENGTH_SHORT).show()
             }
 
@@ -273,9 +261,6 @@ class DateFragment : Fragment() {
             unitType="imperial"
         }
 
-       // val lat:String="12.97"
-        //val lon:String="77.5946"
-        //val dt:String="1593697928"
         val appid:String="0458de72757b2f04185abd9a4b012488"
 
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
@@ -294,14 +279,11 @@ class DateFragment : Fragment() {
 
                 if (response!=null){
                     if (response.code()==200){
+
                         val pastResponse=response.body()
-                        
                         val array=pastResponse.hourly_update
                         var sbuilder=StringBuilder()
                         historyDataList.clear()
-                       // sbuilder.append(pastResponse.current!!.temp.toString()+" "+pastResponse.current!!.weather[0].main+" "+pastResponse.current!!.weather[0].description)
-                       // sbuilder.append(pastResponse.lat.toString())
-                        //weatherTextView.text=sbuilder
                         historyDataList.addAll(array)
                         pastDataAdapter!!.notifyDataSetChanged()
                     }
