@@ -18,7 +18,7 @@ class WeatherResponse {
     @SerializedName("clouds")
     var clouds:Clouds?= null
     @SerializedName("dt")
-    var dt:Float=0.toFloat()
+    var dt:Long=0
     @SerializedName("id")
     var id:Int=0
     @SerializedName("name")

@@ -13,4 +13,6 @@ class Main {
     var temp_min:Float=0.toFloat()
     @SerializedName("temp_max")
     var temp_max:Float=0.toFloat()
+    @SerializedName("feels_like")
+    var feels_like:Float=0.toFloat()
 }

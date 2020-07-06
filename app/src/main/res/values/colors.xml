@@ -3,4 +3,7 @@
     <color name="colorPrimary">#478ADB</color>
     <color name="colorPrimaryDark">#39579A</color>
     <color name="colorAccent">#00FF00</color>
+    <color name="metallic">#FFDF00</color>
+    <color name="oldgold">#D4AF37</color>
+    <color name="vegasgold">#C5B358</color>
 </resources>
