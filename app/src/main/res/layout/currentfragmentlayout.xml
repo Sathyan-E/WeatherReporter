@@ -6,32 +6,27 @@
     android:layout_height="match_parent"
     android:gravity="center">
 
-    <TextView
-        android:id="@+id/userName"
+    <ProgressBar
+        android:id="@+id/current_progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:layout_marginEnd="111dp"
-        android:layout_marginRight="111dp"
-        android:drawableRight="@mipmap/ic_launcher_profile_round"
-        android:gravity="bottom"
-        android:text="@string/sathyan"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="200dp"
+        android:layout_marginLeft="200dp"
+        android:layout_marginTop="200dp"
+        android:foregroundGravity="center"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.cardview.widget.CardView
         android:id="@+id/cardview"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_margin="16dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="200dp"
+        android:padding="16dp"
         app:cardCornerRadius="9dp"
         app:cardElevation="12dp"
-        android:padding="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userName">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/linear_main"
@@ -43,8 +38,8 @@
                 android:id="@+id/linear_first"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:background="@color/oldgold"
                 android:layout_weight="1"
+                android:background="@color/oldgold"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -57,10 +52,10 @@
                         android:id="@+id/current_city_name"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:gravity="center"
-                        android:textStyle="bold"
                         android:layout_weight="1"
-                        android:text="London, GB" />
+                        android:gravity="center"
+                        android:text="London, GB"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/current_climat_description"
@@ -76,9 +71,8 @@
                     android:id="@+id/current_climate_image"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:layout_gravity="center"
-                    android:src="@mipmap/ic_launcher_profile_round" />
+                    android:layout_weight="1" />
             </LinearLayout>
 
             <LinearLayout
@@ -114,8 +108,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:text="Details"
                         android:gravity="bottom|center"
+                        android:text="Details"
                         android:textStyle="bold" />
 
                     <View
@@ -212,8 +206,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:gravity="center|end"
                 android:background="@color/vegasgold"
+                android:gravity="center|end"
                 android:text="6 jul 2020" />
         </LinearLayout>
 

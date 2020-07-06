@@ -25,6 +25,9 @@ class MainActivity : AppCompatActivity() {
         adapter= MyStateAdapter(this)
         viewPager2=findViewById(R.id.viewpager2)
         viewPager2.adapter=adapter
+
+        save("unit","celsius")
+
         val num= arrayOf("Current","Date","Report","Preference")
         TabLayoutMediator(tablayout,viewPager2){tab, position ->
             tab.text=num[position]
@@ -38,6 +41,13 @@ class MainActivity : AppCompatActivity() {
         val  sharedPreferences=getSharedPreferences("weather", Context.MODE_PRIVATE)
         var editor=sharedPreferences.edit()
         editor.clear()
+        editor.apply()
+
+    }
+    private  fun save(key:String,value:String){
+        val  sharedPreferences=getSharedPreferences("weather",Context.MODE_PRIVATE)
+        var editor=sharedPreferences.edit()
+        editor.putString(key,value)
         editor.apply()
 
     }

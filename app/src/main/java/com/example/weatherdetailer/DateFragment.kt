@@ -83,8 +83,8 @@ class DateFragment : Fragment() {
         recyclerView.layoutManager=LinearLayoutManager(context)
 
 
-        dateAdapter= DateForecastAdapter(responseList,R.layout.datefragment_forecast_item)
-        pastDataAdapter= DatePastDataAdapter(historyDataList,R.layout.datefragment_pastdata_item)
+        dateAdapter= DateForecastAdapter(responseList)
+        pastDataAdapter= DatePastDataAdapter(historyDataList)
 
         val nameTextView=view.findViewById<TextView>(R.id.usrnmeDate)
         calendarView=view.findViewById<CalendarView>(R.id.calenderView)

@@ -2,22 +2,7 @@ package com.example.weatherdetailer.network
 
 import com.google.gson.annotations.SerializedName
 
-class PastResponse {
-    @SerializedName("lat")
-    var lat: Float =0F
-    @SerializedName("lon")
-    var lon:Float=0F
-    @SerializedName("timezone")
-    var timezone:String?=null
-    @SerializedName("timezone_offset")
-    var tz_offset:Int=0
-    @SerializedName("current")
-    var current:Current?=null
-    @SerializedName("hourly")
-    var hourly_update=ArrayList<Current>()
-}
-/**
-class Current{
+class Current {
     @SerializedName("dt")
     var dt:Long?=null
     @SerializedName("sunrise")
@@ -48,4 +33,3 @@ class Current{
     var weather=ArrayList<Weather>()
 
 }
- **/

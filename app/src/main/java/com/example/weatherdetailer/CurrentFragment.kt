@@ -8,6 +8,7 @@ import android.location.Geocoder
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -15,8 +16,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
@@ -50,6 +53,8 @@ class CurrentFragment : Fragment() {
     private lateinit var presentCityPressure:TextView
     private lateinit var presentDate:TextView
     private lateinit var presentClimateStateImage:ImageView
+    private lateinit var cardView:CardView
+    private lateinit var progressBar: ProgressBar
 
 
     override fun onCreateView(
@@ -64,7 +69,7 @@ class CurrentFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         
-        val userTextView=view.findViewById<TextView>(R.id.userName)
+       // val userTextView=view.findViewById<TextView>(R.id.userName)
        //cityTextView =view.findViewById<TextView>(R.id.cityname)
 
         //detailsTextView = view.findViewById(R.id.weather)
@@ -77,13 +82,17 @@ class CurrentFragment : Fragment() {
         presentCityHumdity=view.findViewById(R.id.current_city_humidity)
         presentCityPressure=view.findViewById(R.id.current_city_pressure)
         presentDate=view.findViewById(R.id.current_date)
+        cardView=view.findViewById(R.id.cardview)
+        progressBar=view.findViewById(R.id.current_progress_bar)
 
+
+        cardView.visibility=View.INVISIBLE
         fusedLocationClient= LocationServices.getFusedLocationProviderClient(activity!!)
 
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
         val user: String? = sharedPreferences?.getString("name",null)
-        userTextView.text=user
+       // userTextView.text=user
 
 
     }
@@ -108,6 +117,7 @@ class CurrentFragment : Fragment() {
                 if (response!=null){
                     if (response.code() == 200){
                         val weatherResponse=response.body()
+                        cardView.visibility=View.VISIBLE
                         val stringBuilder="Country :"+weatherResponse.sys!!.country+"\n"+
                                 "Temperature: "+weatherResponse.main!!.temp+"\n"+
                                 "Temperature(Min): "+weatherResponse.main!!.temp_min+unit+"\n"+
@@ -160,6 +170,8 @@ class CurrentFragment : Fragment() {
         if (isConnected){
             getLastLocation()
         }else{
+            progressBar.visibility=View.INVISIBLE
+            //cardView.visibility=View.INVISIBLE
             Toast.makeText(activity,"Turn On Internet Connection!",Toast.LENGTH_SHORT).show()
         }
 
@@ -204,7 +216,9 @@ class CurrentFragment : Fragment() {
                     if (location == null){
                         getNewLocation()
                     }else{
-                        //getCityName(location.latitude,location.longitude)
+                        save("lat",location.latitude.toString())
+                        save("lon",location.longitude.toString())
+                        getCityName(location.latitude,location.longitude)
                         findWeather(location.latitude.toString(),location.longitude.toString())
                     }
                 }
@@ -236,7 +250,10 @@ class CurrentFragment : Fragment() {
     private  val locationCallback = object  : LocationCallback(){
         override fun onLocationResult(p0: LocationResult) {
             var lastLocation =p0.lastLocation
-          //  getCityName(lastLocation.latitude,lastLocation.longitude)
+            save("lat",lastLocation.latitude.toString())
+            save("lat",lastLocation.longitude.toString())
+
+            getCityName(lastLocation.latitude,lastLocation.longitude)
             findWeather(lastLocation.latitude.toString(),lastLocation.longitude.toString())
 
         }
@@ -246,14 +263,20 @@ class CurrentFragment : Fragment() {
         var geoCoder= Geocoder(activity, Locale.getDefault())
         var addr=geoCoder.getFromLocation(lat,long,1)
         cityName=addr.get(0).locality
+        save("city",cityName)
        // cityTextView.text=cityName
     }
     private  fun save(key:String,value:String){
         val  sharedPreferences=activity!!.getSharedPreferences("weather",Context.MODE_PRIVATE)
         var editor=sharedPreferences.edit()
         editor.putString(key,value)
-        editor.commit()
+        editor.apply()
 
+    }
+
+    override fun onPause() {
+        super.onPause()
+        cardView.visibility=View.INVISIBLE
     }
 
 

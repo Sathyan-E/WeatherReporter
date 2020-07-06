@@ -40,7 +40,7 @@ class ReportFragment : Fragment() {
         val cityTextView=view.findViewById<TextView>(R.id.city)
         recyclerView=view.findViewById(R.id.recyclerview)
         recyclerView.layoutManager=LinearLayoutManager(context)
-        recyclerAdapter= ReportViewAdapter(responseList,R.layout.reportlayoutitem)
+        recyclerAdapter= ReportViewAdapter(responseList)
         recyclerView.adapter=recyclerAdapter
 
         reportTextView = view.findViewById<TextView>(R.id.report)
@@ -82,6 +82,8 @@ class ReportFragment : Fragment() {
                         responseList.addAll(list)
                         recyclerAdapter!!.notifyDataSetChanged()
 
+                    }else{
+                        Toast.makeText(activity,"Error in Response",Toast.LENGTH_SHORT).show()
                     }
 
                 }else{
@@ -110,7 +112,7 @@ class ReportFragment : Fragment() {
         loadData()
     }
     private  fun getData(shared:SharedPreferences,string: String): String? {
-        return shared?.getString(string,null)
+        return shared.getString(string,null)
     }
 
 }
