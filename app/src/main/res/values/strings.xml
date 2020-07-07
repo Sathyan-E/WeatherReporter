@@ -12,7 +12,7 @@
     <string name="details">Weather Details</string>
     <string name="user">User :</string>
     <string name="date">Date</string>
-    <string name="report">Report</string>
+    <string name="report">Forecast Report</string>
     <string name="setting">Settings</string>
     <string name="click">Click button to chage the paramter of temperature"</string>
     <string name="celsius">Celsius</string>

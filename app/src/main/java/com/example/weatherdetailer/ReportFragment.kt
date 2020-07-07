@@ -2,13 +2,17 @@ package com.example.weatherdetailer
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,11 +28,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class ReportFragment : Fragment() {
     var unitType=""
+    var lastUsedUnit:String=""
     lateinit var sharedPreferences: SharedPreferences
     lateinit var reportTextView:TextView
     private var responseList:MutableList<WeatherResponse> = ArrayList()
     private lateinit var recyclerView: RecyclerView
     private var recyclerAdapter: ReportViewAdapter? =null
+    private lateinit var progrssBar: ProgressBar
+  //  private lateinit var cardView:CardView
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,21 +43,23 @@ class ReportFragment : Fragment() {
     ): View?{
 
         val view= inflater.inflate(R.layout.reportfragmentlayout,container,false)
-        val nameTextView=view.findViewById<TextView>(R.id.usrnmeReport)
+        //val nameTextView=view.findViewById<TextView>(R.id.usrnmeReport)
         val cityTextView=view.findViewById<TextView>(R.id.city)
         recyclerView=view.findViewById(R.id.recyclerview)
         recyclerView.layoutManager=LinearLayoutManager(context)
         recyclerAdapter= ReportViewAdapter(responseList)
         recyclerView.adapter=recyclerAdapter
+        recyclerView.visibility=View.INVISIBLE
 
         reportTextView = view.findViewById<TextView>(R.id.report)
+
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
 
         val user: String? =getData(sharedPreferences,"name")
         val city: String? = getData(sharedPreferences,"city")
 
-        nameTextView.text=user
+        //nameTextView.text=user
         cityTextView.text=city
 
         return view
@@ -59,6 +68,7 @@ class ReportFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        progrssBar=view.findViewById(R.id.report_progressbar)
 
     }
     private fun loadData(){
@@ -80,6 +90,8 @@ class ReportFragment : Fragment() {
                         responseList.clear()
                         val list=weatherResponse.list
                         responseList.addAll(list)
+                        progrssBar.visibility=View.INVISIBLE
+                        recyclerView.visibility=View.VISIBLE
                         recyclerAdapter!!.notifyDataSetChanged()
 
                     }else{
@@ -102,17 +114,50 @@ class ReportFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         val unit =getData(sharedPreferences,"unit")
-        if(unit=="celsius"){
-            unitType="metric"
+
+
+        val isConnected=isInternetConnected()
+        if (isConnected){
+            if(lastUsedUnit!=unit){
+                progrssBar.visibility=View.VISIBLE
+                if(unit=="celsius"){
+                    unitType="metric"
+                    lastUsedUnit="celsius"
+                }
+                else if(unit=="farenheit"){
+                    unitType="imperial"
+                    lastUsedUnit="farenheit"
+                }
+
+                loadData()
+
+            }
+            else{
+                recyclerView.visibility=View.VISIBLE
+            }
+
         }
-        else if(unit=="farenheit"){
-            unitType="imperial"
+        else{
+            progrssBar.visibility=View.INVISIBLE
+            Toast.makeText(activity,"No Internet Connection!",Toast.LENGTH_SHORT).show()
         }
 
-        loadData()
+
     }
     private  fun getData(shared:SharedPreferences,string: String): String? {
         return shared.getString(string,null)
     }
+    private fun isInternetConnected():Boolean{
+        val cm= context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo?=cm.activeNetworkInfo
+        val isConnected:Boolean=activeNetwork?.isConnectedOrConnecting==true
+        return isConnected
+    }
+
+    override fun onPause() {
+            super.onPause()
+            recyclerView.visibility=View.INVISIBLE
+    }
+
 
 }

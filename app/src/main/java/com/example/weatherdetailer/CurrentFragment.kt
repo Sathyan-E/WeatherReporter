@@ -2,27 +2,32 @@ package com.example.weatherdetailer
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.location.Geocoder
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.net.Uri
 import android.opengl.Visibility
 import android.os.Bundle
+import android.os.Environment
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.weatherdetailer.network.WeatherResponse
 import com.example.weatherdetailer.network.WeatherService
 import com.google.android.gms.location.*
@@ -32,10 +37,12 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CurrentFragment : Fragment() {
+class CurrentFragment : Fragment(),SwipeRefreshLayout.OnRefreshListener {
     var unitType=""
     lateinit var detailsTextView:TextView
     lateinit var cityTextView:TextView
@@ -55,6 +62,10 @@ class CurrentFragment : Fragment() {
     private lateinit var presentClimateStateImage:ImageView
     private lateinit var cardView:CardView
     private lateinit var progressBar: ProgressBar
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var ssImageView: ImageView
+    private lateinit var shareButton:Button
+
 
 
     override fun onCreateView(
@@ -84,15 +95,90 @@ class CurrentFragment : Fragment() {
         presentDate=view.findViewById(R.id.current_date)
         cardView=view.findViewById(R.id.cardview)
         progressBar=view.findViewById(R.id.current_progress_bar)
+        shareButton=view.findViewById(R.id.share_button)
+        ssImageView=view.findViewById(R.id.screeenshot_imageview)
+       /**
+        swipeRefreshLayout=view.findViewById(R.id.swipe_refresher)
+        swipeRefreshLayout.setOnRefreshListener {
 
+            refresh()
+        }
+        **/
 
-        cardView.visibility=View.INVISIBLE
+       // cardView.visibility=View.INVISIBLE
         fusedLocationClient= LocationServices.getFusedLocationProviderClient(activity!!)
 
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
         val user: String? = sharedPreferences?.getString("name",null)
        // userTextView.text=user
+
+        shareButton.setOnClickListener {
+           Toast.makeText(activity,"Button CLicked",Toast.LENGTH_SHORT).show()
+            ActivityCompat.requestPermissions(
+                    activity!!,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE),PackageManager.PERMISSION_GRANTED)
+
+            val bitmap=Bitmap.createBitmap(cardView.width,cardView.height,Bitmap.Config.ARGB_8888)
+            val canvas:Canvas= Canvas(bitmap)
+            cardView.draw(canvas)
+            ssImageView.setImageBitmap(bitmap)
+            /**
+             *
+             */
+           // val path:String= context?.externalCacheDir.toString()+Calendar.getInstance().time.toString()+".jpg"
+            //val filePath:String=context?.getExternalFilesDir("image/*").toString()+Calendar.getInstance().time.toString()+".jpg"
+            //val file:File= File(filePath)
+            //val file2:File=File(path)
+            //val fileStream:FileOutputStream= FileOutputStream(file)
+            //val quality:Int=100
+            //bitmap.compress(Bitmap.CompressFormat.JPEG,quality,fileStream)
+            //fileStream.flush()
+            //fileStream.close()
+
+
+            //
+            val  mainDirectoryname:File=File(context!!.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"ScreenShots")
+            if (!mainDirectoryname.exists()){
+                if (mainDirectoryname.mkdirs()){
+                    Log.e("Create Directory","Main Directory created: "+mainDirectoryname)
+                }
+            }
+
+            val name:String="screenshot"+ Calendar.getInstance().time.toString()+".jpg"
+            val dir :File=File(mainDirectoryname.absolutePath)
+            if (!dir.exists()){
+                dir.mkdirs()
+            }
+            val imagefile:File= File(mainDirectoryname.absolutePath,name)
+            val outPutStream:FileOutputStream = FileOutputStream(imagefile)
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100,outPutStream)
+
+            Toast.makeText(activity,"FIle saved in directory",Toast.LENGTH_SHORT).show()
+            outPutStream.flush()
+            outPutStream.close()
+
+            shareScreenShot(imagefile)
+
+        }
+
+
+    }
+    private fun shareScreenShot(imageFile:File){
+       // val shareIntent=Intent()
+        //shareIntent.setAction(Intent.ACTION_VIEW)
+        //val uri:Uri= Uri.fromFile(imageFile)
+        //shareIntent.setDataAndType(uri,"image/*")
+        //startActivity(shareIntent)
+        //
+        val fileuri:Uri=
+            FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
+
+        val intent=Intent()
+        intent.setAction(Intent.ACTION_SEND)
+        intent.setType("image/*")
+        intent.putExtra(Intent.EXTRA_STREAM,fileuri)
+        startActivity(Intent.createChooser(intent,"Share Screenshot"))
 
 
     }
@@ -118,15 +204,7 @@ class CurrentFragment : Fragment() {
                     if (response.code() == 200){
                         val weatherResponse=response.body()
                         cardView.visibility=View.VISIBLE
-                        val stringBuilder="Country :"+weatherResponse.sys!!.country+"\n"+
-                                "Temperature: "+weatherResponse.main!!.temp+"\n"+
-                                "Temperature(Min): "+weatherResponse.main!!.temp_min+unit+"\n"+
-                                "Temperature(Max): "+weatherResponse.main!!.temp_max+unit+"\n"+
-                                weatherResponse.weather!![0].description+"\n"
-                        "Humidity: "+weatherResponse.main!!.humudity+"\n"+
-                                "Pressure: "+weatherResponse.main!!.pressure
-
-
+                        progressBar.visibility=View.INVISIBLE
                         presentCityName.text=weatherResponse.name
                         presentCityDescription.text=weatherResponse.weather[0].description
                         var temp:String=weatherResponse.main!!.temp.toString()+" "+u
@@ -166,6 +244,9 @@ class CurrentFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        refresh()
+    }
+    fun refresh(){
         val isConnected=isInternetConnected()
         if (isConnected){
             getLastLocation()
@@ -279,11 +360,50 @@ class CurrentFragment : Fragment() {
         cardView.visibility=View.INVISIBLE
     }
 
+    override fun onRefresh() {
+        //TODO("Not yet implemented")
 
+        refresh()
 
+    }
+    private fun share(view: View){
+        val screenView:View=view!!.findViewById(R.id.constraintlayout)
+        val returedBitmap:Bitmap= Bitmap.createBitmap(screenView.width,screenView.height,Bitmap.Config.ARGB_8888)
+        val canvas=Canvas(returedBitmap)
+        val bgDrawable=screenView.background
+        if (bgDrawable!=null){
+            bgDrawable.draw(canvas)
+        }
+        else{
+            canvas.drawColor(Color.WHITE)
+            screenView.draw(canvas)
 
+        }
+        val mediaStorageDir:File= File(context?.externalCacheDir,"Image.png")
 
+        val outputStream:FileOutputStream =FileOutputStream(mediaStorageDir as String)
+        returedBitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream)
+        outputStream.close()
 
+/**
+        val screenView:View=view.findViewById(R.id.cardview)
+        screenView.isDrawingCacheEnabled=true
+
+        val bitmap=Bitmap.createBitmap(screenView.getDrawingCache())
+        screenView.isDrawingCacheEnabled=false
+
+        val filePath:String=Environment.getExternalStorageDirectory()+"/Download/"+Calendar.getInstance().time.toString()+".jpg"
+
+        val screenShot:File= File(filePath)
+        var fileOutStream: FileOutputStream? =null
+
+        fileOutStream= FileOutputStream(screenShot)
+        bitmap.compress(Bitmap.CompressFormat.JPEG,100,fileOutStream)
+        fileOutStream.flush()
+        fileOutStream.close()
+**/
+
+    }
 
 
 }

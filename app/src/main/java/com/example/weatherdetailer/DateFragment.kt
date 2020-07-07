@@ -1,14 +1,24 @@
 package com.example.weatherdetailer
 
+import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,6 +37,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
@@ -55,9 +67,11 @@ class DateFragment : Fragment() {
     private var pastDataAdapter:DatePastDataAdapter?=null
     private var historyDataList:MutableList<Current> = ArrayList()
     private lateinit var autocompleteSupportFragment:AutocompleteSupportFragment
-     lateinit var currentDataTextview:TextView
+    lateinit var currentDataTextview:TextView
     var lastUpdate:Int=-1
     var lastunitPreference:String=""
+    private lateinit var shareButton: Button
+    private lateinit var sharingLayout: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -72,7 +86,44 @@ class DateFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         currentDataTextview=view.findViewById(R.id.data_type)
+        shareButton=view.findViewById(R.id.datefragment_share_button)
+        sharingLayout=view.findViewById(R.id.layout_sharing)
+        shareButton.isEnabled=false
 
+        shareButton.setOnClickListener {
+            ActivityCompat.requestPermissions(
+                activity!!,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE),
+                PackageManager.PERMISSION_GRANTED)
+
+            val bitmap= Bitmap.createBitmap(sharingLayout.width,sharingLayout.height, Bitmap.Config.ARGB_8888)
+            val canvas: Canvas = Canvas(bitmap)
+            sharingLayout.draw(canvas)
+            //ssImageView.setImageBitmap(bitmap)
+            val  mainDirectoryname: File =
+                File(context!!.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"ScreenShots")
+            if (!mainDirectoryname.exists()){
+                if (mainDirectoryname.mkdirs()){
+                    Log.e("Create Directory","Main Directory created: "+mainDirectoryname)
+                }
+            }
+            val name:String="screenshot"+ Calendar.getInstance().time.toString()+".jpg"
+            val dir :File=File(mainDirectoryname.absolutePath)
+            if (!dir.exists()){
+                dir.mkdirs()
+            }
+            val imagefile:File= File(mainDirectoryname.absolutePath,name)
+            val outPutStream: FileOutputStream = FileOutputStream(imagefile)
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100,outPutStream)
+
+            Toast.makeText(activity,"FIle saved in directory",Toast.LENGTH_SHORT).show()
+            outPutStream.flush()
+            outPutStream.close()
+
+            shareScreenShot(imagefile)
+
+
+        }
         Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
         var placesClient=Places.createClient(context!!)
         
@@ -83,11 +134,13 @@ class DateFragment : Fragment() {
         recyclerView.layoutManager=LinearLayoutManager(context)
 
 
+
         dateAdapter= DateForecastAdapter(responseList)
         pastDataAdapter= DatePastDataAdapter(historyDataList)
 
-        val nameTextView=view.findViewById<TextView>(R.id.usrnmeDate)
+//        val nameTextView=view.findViewById<TextView>(R.id.usrnmeDate)
         calendarView=view.findViewById<CalendarView>(R.id.calenderView)
+
 
         val date=calendarView.date
         val min=date-432000000
@@ -146,6 +199,7 @@ class DateFragment : Fragment() {
         }
         autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(p0: Place) {
+               shareButton.isEnabled=true
                 Toast.makeText(activity,"Place selected"+p0.name+" "+p0.latLng!!.latitude+" "+p0.latLng!!.longitude,Toast.LENGTH_SHORT).show()
                 selectedLat=p0.latLng!!.latitude.toString()
                 selectedlon=p0.latLng!!.longitude.toString()
@@ -153,6 +207,7 @@ class DateFragment : Fragment() {
                 isPlaceSelected=true
                 if(isDateChanged==false){
                     Toast.makeText(activity,"status change of date"+isDateChanged,Toast.LENGTH_SHORT).show()
+                    recyclerView.adapter=dateAdapter
                     loadCurrentData(selectedLat,selectedlon)
                 }else if(isDateChanged){
                     if(isPast){
@@ -172,10 +227,27 @@ class DateFragment : Fragment() {
 
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
-        val user: String? = getData(sharedPreferences,"name")
-        nameTextView.text=user
 
     }
+    private fun shareScreenShot(imageFile:File){
+        // val shareIntent=Intent()
+        //shareIntent.setAction(Intent.ACTION_VIEW)
+        //val uri:Uri= Uri.fromFile(imageFile)
+        //shareIntent.setDataAndType(uri,"image/*")
+        //startActivity(shareIntent)
+        //
+        val fileuri: Uri =
+            FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
+
+        val intent= Intent()
+        intent.setAction(Intent.ACTION_SEND)
+        intent.setType("image/*")
+        intent.putExtra(Intent.EXTRA_STREAM,fileuri)
+        startActivity(Intent.createChooser(intent,"Share Screenshot"))
+
+
+    }
+
     override fun onResume() {
         super.onResume()
         val unitPreference=getData(sharedPreferences,"unit")
@@ -302,6 +374,7 @@ class DateFragment : Fragment() {
     }
     private fun loadCurrentData(lat:String,lng:String){
         lastUpdate=1
+        currentDataTextview.text= "Date :$m Location: $selectedCity"
         val unit =getData(sharedPreferences,"unit")
         lastunitPreference=unit!!
 
@@ -322,6 +395,9 @@ class DateFragment : Fragment() {
                 if (response!=null){
                     if (response.code() == 200){
                         val weatherResponse=response.body()
+                       responseList.clear()
+                        responseList.add(weatherResponse)
+                        dateAdapter!!.notifyDataSetChanged()
                         val stringBuilder="Country :"+weatherResponse.sys!!.country+"\n"+
                                 "Temperature: "+weatherResponse.main!!.temp+"\n"+
                                 "Temperature(Min): "+weatherResponse.main!!.temp_min+unit+"\n"+
@@ -329,7 +405,7 @@ class DateFragment : Fragment() {
                                 weatherResponse.weather!![0].description+"\n"
                         "Humidity: "+weatherResponse.main!!.humudity+"\n"+
                                 "Pressure: "+weatherResponse.main!!.pressure
-                        currentDataTextview.text=stringBuilder
+                       // currentDataTextview.text=stringBuilder
 
                     }
                 }
