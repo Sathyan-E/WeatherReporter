@@ -1,39 +1,33 @@
 package com.example.weatherdetailer
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
     lateinit var adapter: MyStateAdapter
     lateinit var viewPager2: ViewPager2
-    lateinit var menu:Menu
+   // lateinit var menu:Menu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
+        //binding views
         val tablayout:TabLayout =findViewById(R.id.tabs)
-        adapter= MyStateAdapter(this)
         viewPager2=findViewById(R.id.viewpager2)
+        //instantiating adapter
+        adapter= MyStateAdapter(this)
+        //setting adapter to viewpager2
         viewPager2.adapter=adapter
-
+        //By default the user preference is celsius
         save("unit","celsius")
-
-
+        //Array titles for tabs
         val num= arrayOf("Current","Date","Report","Preference")
+        //Tab layout mediator
         TabLayoutMediator(tablayout,viewPager2){tab, position ->
             tab.text=num[position]
         }.attach()
@@ -43,29 +37,22 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        //Clear all the preferences
         val  sharedPreferences=getSharedPreferences("weather", Context.MODE_PRIVATE)
-        var editor=sharedPreferences.edit()
+        val editor=sharedPreferences.edit()
         editor.clear()
         editor.apply()
-
     }
-    private  fun save(key:String,value:String){
+    //Method for saving data in Sharedpreferences
+    private  fun save( key:String,value:String){
+
         val  sharedPreferences=getSharedPreferences("weather",Context.MODE_PRIVATE)
-        var editor=sharedPreferences.edit()
+        val editor=sharedPreferences.edit()
         editor.putString(key,value)
         editor.apply()
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflator:MenuInflater=menuInflater
-       // inflator.inflate(R.menu.main_options,menu)
-        return true
 
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return super.onOptionsItemSelected(item)
-    }
 
 }

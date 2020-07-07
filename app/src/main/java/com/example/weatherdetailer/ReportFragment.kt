@@ -1,18 +1,29 @@
 package com.example.weatherdetailer
 
+import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.location.Geocoder
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.os.Looper
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.cardview.widget.CardView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,11 +31,16 @@ import com.example.weatherdetailer.adapter.ReportViewAdapter
 import com.example.weatherdetailer.network.MonthlyResponse
 import com.example.weatherdetailer.network.WeatherResponse
 import com.example.weatherdetailer.network.WeatherService
+import com.google.android.gms.location.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
+import java.io.FileOutputStream
+import java.util.*
+import kotlin.collections.ArrayList
 
 class ReportFragment : Fragment() {
     var unitType=""
@@ -35,7 +51,12 @@ class ReportFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private var recyclerAdapter: ReportViewAdapter? =null
     private lateinit var progrssBar: ProgressBar
-  //  private lateinit var cardView:CardView
+   private lateinit var screenshotView:LinearLayout
+    private lateinit var shareButton: Button
+    private val PERMISSION_ID=1000
+    lateinit var fusedLocationClient : FusedLocationProviderClient
+    lateinit var locationRequest: LocationRequest
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,24 +64,6 @@ class ReportFragment : Fragment() {
     ): View?{
 
         val view= inflater.inflate(R.layout.reportfragmentlayout,container,false)
-        //val nameTextView=view.findViewById<TextView>(R.id.usrnmeReport)
-        val cityTextView=view.findViewById<TextView>(R.id.city)
-        recyclerView=view.findViewById(R.id.recyclerview)
-        recyclerView.layoutManager=LinearLayoutManager(context)
-        recyclerAdapter= ReportViewAdapter(responseList)
-        recyclerView.adapter=recyclerAdapter
-        recyclerView.visibility=View.INVISIBLE
-
-        reportTextView = view.findViewById<TextView>(R.id.report)
-
-
-        sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
-
-        val user: String? =getData(sharedPreferences,"name")
-        val city: String? = getData(sharedPreferences,"city")
-
-        //nameTextView.text=user
-        cityTextView.text=city
 
         return view
 
@@ -68,18 +71,98 @@ class ReportFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        //val nameTextView=view.findViewById<TextView>(R.id.usrnmeReport)
+        val cityTextView=view.findViewById<TextView>(R.id.city)
+        recyclerView=view.findViewById(R.id.recyclerview)
+        screenshotView=view.findViewById(R.id.report_sharing_layout)
+        shareButton=view.findViewById(R.id.report_sharing_button)
+
+        recyclerView.layoutManager=LinearLayoutManager(context)
+        recyclerAdapter= ReportViewAdapter(responseList)
+        recyclerView.adapter=recyclerAdapter
+        recyclerView.visibility=View.INVISIBLE
+
+        reportTextView = view.findViewById<TextView>(R.id.report)
+
+        fusedLocationClient= LocationServices.getFusedLocationProviderClient(activity!!)
+
+
+        sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
+
+
+        val city: String? = getData(sharedPreferences,"city")
+
+        //nameTextView.text=user
+        cityTextView.text=city
+
         progrssBar=view.findViewById(R.id.report_progressbar)
 
-    }
-    private fun loadData(){
+        shareButton.setOnClickListener {
+            Toast.makeText(activity,"sharing the screenshot",Toast.LENGTH_SHORT).show()
+            ActivityCompat.requestPermissions(
+                activity!!,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE),
+                PackageManager.PERMISSION_GRANTED)
 
-        val lat=getData(sharedPreferences,"lat")
-        val lon=getData(sharedPreferences,"lon")
+            val bitmap= Bitmap.createBitmap(screenshotView.width,screenshotView.height, Bitmap.Config.ARGB_8888)
+            val canvas: Canvas = Canvas(bitmap)
+            screenshotView.draw(canvas)
+            //ssImageView.setImageBitmap(bitmap)
+
+            val  mainDirectoryname: File =
+                File(context!!.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"ScreenShots")
+            if (!mainDirectoryname.exists()){
+                if (mainDirectoryname.mkdirs()){
+                    Log.e("Create Directory","Main Directory created: "+mainDirectoryname)
+                }
+            }
+
+            val name:String="screenshot"+ Calendar.getInstance().time.toString()+".jpg"
+            val dir : File = File(mainDirectoryname.absolutePath)
+            if (!dir.exists()){
+                dir.mkdirs()
+            }
+            val imagefile: File = File(mainDirectoryname.absolutePath,name)
+            val outPutStream: FileOutputStream = FileOutputStream(imagefile)
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100,outPutStream)
+
+            Toast.makeText(activity,"FIle saved in directory",Toast.LENGTH_SHORT).show()
+            outPutStream.flush()
+            outPutStream.close()
+            shareScreenShot(imagefile)
+
+        }
+
+    }
+
+    private fun shareScreenShot(imageFile:File){
+        // val shareIntent=Intent()
+        //shareIntent.setAction(Intent.ACTION_VIEW)
+        //val uri:Uri= Uri.fromFile(imageFile)
+        //shareIntent.setDataAndType(uri,"image/*")
+        //startActivity(shareIntent)
+        //
+        val fileuri: Uri =
+            FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
+
+        val intent= Intent()
+        intent.setAction(Intent.ACTION_SEND)
+        intent.setType("image/*")
+        intent.putExtra(Intent.EXTRA_STREAM,fileuri)
+        startActivity(Intent.createChooser(intent,"Share Screenshot"))
+
+
+    }
+
+    private fun loadData(lat:String,lon:String){
+
+        //val lat=getData(sharedPreferences,"lat")
+        //val lon=getData(sharedPreferences,"lon")
 
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
 
-        val reportCall = service.getForecast(lat.toString(),lon.toString(),"0458de72757b2f04185abd9a4b012488",unitType)
+        val reportCall = service.getForecast(lat,lon,"0458de72757b2f04185abd9a4b012488",unitType)
 
         reportCall.enqueue(object : Callback<MonthlyResponse> {
             override fun onResponse(call: Call<MonthlyResponse>?, response: Response<MonthlyResponse>?) {
@@ -129,7 +212,7 @@ class ReportFragment : Fragment() {
                     lastUsedUnit="farenheit"
                 }
 
-                loadData()
+                getLastLocation()
 
             }
             else{
@@ -158,6 +241,96 @@ class ReportFragment : Fragment() {
             super.onPause()
             recyclerView.visibility=View.INVISIBLE
     }
+    private  fun getLastLocation():String{
+        var name:String=""
+        if(checkPermission()){
+            if (isLocationEnabled()){
+                fusedLocationClient .lastLocation.addOnCompleteListener{task ->
+                    var location = task.result
+                    if (location == null){
+                        getNewLocation()
+                    }else{
+                       // save("lat",location.latitude.toString())
+                        //save("lon",location.longitude.toString())
+                        getCityName(location.latitude,location.longitude)
+                        loadData(location.latitude.toString(),location.longitude.toString())
+                    }
+                }
+
+            }else{
+                Toast.makeText(activity,"Please Enable Your Location Service!",Toast.LENGTH_SHORT).show()
+            }
+
+        }else{
+            requestPermission()
+        }
+        return name
+    }
+    private  fun getNewLocation(){
+        locationRequest= LocationRequest()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval=0
+        locationRequest.fastestInterval=0
+        locationRequest.numUpdates=2
+        if (ActivityCompat.checkSelfPermission(activity!!, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity!!, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(activity,"Problem in getting location permission",Toast.LENGTH_SHORT).show()
+            return
+        }
+        fusedLocationClient!!.requestLocationUpdates(
+            locationRequest,locationCallback, Looper.myLooper()
+        )
+    }
+
+    private  val locationCallback = object  : LocationCallback(){
+        override fun onLocationResult(p0: LocationResult) {
+            var lastLocation =p0.lastLocation
+           // save("lat",lastLocation.latitude.toString())
+            //save("lat",lastLocation.longitude.toString())
+
+            getCityName(lastLocation.latitude,lastLocation.longitude)
+           loadData(lastLocation.latitude.toString(),lastLocation.longitude.toString())
+
+        }
+    }
+    private fun checkPermission():Boolean{
+        if (
+            ActivityCompat.checkSelfPermission(context!!,android.Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(context!!,Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ){
+            return true
+        }
+        return false
+    }
+
+    private  fun requestPermission(){
+        ActivityCompat.requestPermissions(
+            activity!!,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),1
+        )
+    }
+
+    private  fun isLocationEnabled():Boolean{
+        var locationManager=activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+            LocationManager.NETWORK_PROVIDER)
+    }
+
+    private fun getCityName(lat:Double,long: Double) {
+        var cityName=""
+        var geoCoder= Geocoder(activity, Locale.getDefault())
+        var addr=geoCoder.getFromLocation(lat,long,1)
+        cityName=addr.get(0).locality
+        save("city",cityName)
+        // cityTextView.text=cityName
+    }
+    private  fun save(key:String,value:String){
+        val  sharedPreferences=activity!!.getSharedPreferences("weather",Context.MODE_PRIVATE)
+        var editor=sharedPreferences.edit()
+        editor.putString(key,value)
+        editor.apply()
+
+    }
+
 
 
 }

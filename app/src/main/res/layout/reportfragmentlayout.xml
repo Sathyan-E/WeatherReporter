@@ -6,19 +6,6 @@
     android:layout_height="match_parent"
     android:gravity="center">
 
-
-    <TextView
-        android:id="@+id/city"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="25dp"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="25dp"
-        android:text="@string/city"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <ProgressBar
         android:id="@+id/report_progressbar"
         android:layout_width="wrap_content"
@@ -30,27 +17,44 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/report_sharing_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="75dp"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/city">
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/report"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="25dp"
-            android:scrollbars="vertical"
             android:text="@string/report" />
+
+        <TextView
+            android:id="@+id/city"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/city"
+            android:textStyle="bold" />
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/report_sharing_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginRight="25dp"
+        android:text="Button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
