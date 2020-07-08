@@ -121,6 +121,7 @@ class DateFragment : Fragment() {
             outPutStream.close()
 
             shareScreenShot(imagefile)
+            imagefile.delete()
 
 
         }

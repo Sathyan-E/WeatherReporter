@@ -130,6 +130,7 @@ class ReportFragment : Fragment() {
             outPutStream.flush()
             outPutStream.close()
             shareScreenShot(imagefile)
+            imagefile.delete()
 
         }
 

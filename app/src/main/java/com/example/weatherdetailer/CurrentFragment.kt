@@ -58,8 +58,8 @@ class CurrentFragment : Fragment(){
     private lateinit var presentClimateStateImage:ImageView
     private lateinit var cardView:CardView
     private lateinit var progressBar: ProgressBar
-    //private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private lateinit var ssImageView: ImageView
+  //  private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+   // private lateinit var ssImageView: ImageView
     private lateinit var shareButton:Button
 
 
@@ -87,7 +87,8 @@ class CurrentFragment : Fragment(){
         cardView=view.findViewById(R.id.cardview)
         progressBar=view.findViewById(R.id.current_progress_bar)
         shareButton=view.findViewById(R.id.share_button)
-        ssImageView=view.findViewById(R.id.screeenshot_imageview)
+        detailsTextView=view.findViewById(R.id.problem_details_textview)
+       // ssImageView=view.findViewById(R.id.screeenshot_imageview)
         //making cardview invisible it will visible when we completes the fetching the data process
         cardView.visibility=View.INVISIBLE
        //fusedlocationclient instantiation
@@ -136,6 +137,7 @@ class CurrentFragment : Fragment(){
             outPutStream.close()
             //sharing the stored screenshot
             shareScreenShot(imagefile)
+            imagefile.delete()
 
         }
 
