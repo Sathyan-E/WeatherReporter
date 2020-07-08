@@ -26,7 +26,6 @@ import com.example.weatherdetailer.adapter.DateForecastAdapter
 import com.example.weatherdetailer.adapter.DatePastDataAdapter
 import com.example.weatherdetailer.network.*
 import com.google.android.gms.common.api.Status
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.TypeFilter
@@ -39,7 +38,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -47,14 +45,13 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class DateFragment : Fragment() {
-   lateinit var calendarView: CalendarView
+    private lateinit var calendarView: CalendarView
     private lateinit var unitType:String
-    private lateinit var weather:TextView
     var  m:String=""
     var selectedLat:String=""
     var selectedlon:String=""
     var selectedDate:String=""
-    lateinit var sharedPreferences: SharedPreferences
+    private lateinit var sharedPreferences: SharedPreferences
     lateinit var   selectedCity:String
     var isfuture:Boolean=false
     var isPast:Boolean=false
@@ -68,8 +65,8 @@ class DateFragment : Fragment() {
     private var historyDataList:MutableList<Current> = ArrayList()
     private lateinit var autocompleteSupportFragment:AutocompleteSupportFragment
     lateinit var currentDataTextview:TextView
-    var lastUpdate:Int=-1
-    var lastunitPreference:String=""
+    private var lastUpdate:Int=-1
+    private var lastunitPreference:String=""
     private lateinit var shareButton: Button
     private lateinit var sharingLayout: LinearLayout
 
@@ -97,23 +94,23 @@ class DateFragment : Fragment() {
                 PackageManager.PERMISSION_GRANTED)
 
             val bitmap= Bitmap.createBitmap(sharingLayout.width,sharingLayout.height, Bitmap.Config.ARGB_8888)
-            val canvas: Canvas = Canvas(bitmap)
+            val canvas = Canvas(bitmap)
             sharingLayout.draw(canvas)
             //ssImageView.setImageBitmap(bitmap)
-            val  mainDirectoryname: File =
+            val  mainDirectoryname =
                 File(context!!.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"ScreenShots")
             if (!mainDirectoryname.exists()){
                 if (mainDirectoryname.mkdirs()){
-                    Log.e("Create Directory","Main Directory created: "+mainDirectoryname)
+                    Log.e("Create Directory", "Main Directory created: $mainDirectoryname")
                 }
             }
             val name:String="screenshot"+ Calendar.getInstance().time.toString()+".jpg"
-            val dir :File=File(mainDirectoryname.absolutePath)
+            val dir =File(mainDirectoryname.absolutePath)
             if (!dir.exists()){
                 dir.mkdirs()
             }
-            val imagefile:File= File(mainDirectoryname.absolutePath,name)
-            val outPutStream: FileOutputStream = FileOutputStream(imagefile)
+            val imagefile = File(mainDirectoryname.absolutePath,name)
+            val outPutStream = FileOutputStream(imagefile)
             bitmap.compress(Bitmap.CompressFormat.JPEG,100,outPutStream)
 
             Toast.makeText(activity,"FIle saved in directory",Toast.LENGTH_SHORT).show()
@@ -140,7 +137,7 @@ class DateFragment : Fragment() {
         pastDataAdapter= DatePastDataAdapter(historyDataList)
 
 //        val nameTextView=view.findViewById<TextView>(R.id.usrnmeDate)
-        calendarView=view.findViewById<CalendarView>(R.id.calenderView)
+        calendarView=view.findViewById(R.id.calenderView)
 
 
         val date=calendarView.date
@@ -153,16 +150,16 @@ class DateFragment : Fragment() {
         calendarView.setOnDateChangeListener{ view, year, month, dayOfMonth ->
 
             m= "$year-"
-            if(month<10){
-                m+="0"+(month+1).toString()+"-"
+            m += if(month<10){
+                "0"+(month+1).toString()+"-"
                 // m+= "0$month+1"
             }else{
-                m+= "$month-"
+                "$month-"
             }
-            if (dayOfMonth<10){
-                m+="0$dayOfMonth"
+            m += if (dayOfMonth<10){
+                "0$dayOfMonth"
             }else{
-                m+="$dayOfMonth"
+                "$dayOfMonth"
             }
 
             val l=LocalDate.parse(m, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
@@ -174,7 +171,7 @@ class DateFragment : Fragment() {
                 isfuture=true
                 isPast=false
                 recyclerView.adapter=dateAdapter
-                if (isPlaceSelected==true){
+                if (isPlaceSelected){
 
                     loadForecast(selectedLat,selectedlon,m)
                 }else{
@@ -186,7 +183,7 @@ class DateFragment : Fragment() {
                 isfuture=false
                 isPast=true
                 recyclerView.adapter=pastDataAdapter
-                if (isPlaceSelected==true){
+                if (isPlaceSelected){
                     loadPastData(selectedLat,selectedlon,selectedDate)
                 }
                 else{
@@ -206,8 +203,8 @@ class DateFragment : Fragment() {
                 selectedlon=p0.latLng!!.longitude.toString()
                 selectedCity= p0.name.toString()
                 isPlaceSelected=true
-                if(isDateChanged==false){
-                    Toast.makeText(activity,"status change of date"+isDateChanged,Toast.LENGTH_SHORT).show()
+                if(!isDateChanged){
+                    Toast.makeText(activity, "status change of date$isDateChanged",Toast.LENGTH_SHORT).show()
                     recyclerView.adapter=dateAdapter
                     loadCurrentData(selectedLat,selectedlon)
                 }else if(isDateChanged){
@@ -241,8 +238,8 @@ class DateFragment : Fragment() {
             FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
 
         val intent= Intent()
-        intent.setAction(Intent.ACTION_SEND)
-        intent.setType("image/*")
+        intent.action = Intent.ACTION_SEND
+        intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_STREAM,fileuri)
         startActivity(Intent.createChooser(intent,"Share Screenshot"))
 
@@ -264,7 +261,8 @@ class DateFragment : Fragment() {
 
     private  fun loadForecast(lat: String,lng:String, day:String){
         lastUpdate=2
-        currentDataTextview.text="Date :"+m+" "+"Location: "+selectedCity
+        val date= "Date :$m Location: $selectedCity"
+        currentDataTextview.text=date
         val unit =getData(sharedPreferences,"unit")
         lastunitPreference=unit!!
 
@@ -289,8 +287,8 @@ class DateFragment : Fragment() {
                         val list=weatherResponse.list
 
                         responseList.clear()
-                        var num:Int=0
-                        var array:ArrayList<WeatherResponse> = ArrayList()
+                        var num=0
+                        val array:ArrayList<WeatherResponse> = ArrayList()
                         for(i in list){
                             val dateString:String=weatherResponse.list[num].date.toString().substring(0,10)
                             if(day==dateString){
@@ -323,7 +321,8 @@ class DateFragment : Fragment() {
     }
     private  fun loadPastData(lat:String,lon:String,dt:String){
         lastUpdate=0
-        currentDataTextview.text="Date :"+m+" "+"Location: "+selectedCity
+        val date= "Date :$m Location: $selectedCity"
+        currentDataTextview.text=date
         val unit =getData(sharedPreferences,"unit")
         lastunitPreference=unit!!
 
@@ -334,7 +333,7 @@ class DateFragment : Fragment() {
             unitType="imperial"
         }
 
-        val appid:String="0458de72757b2f04185abd9a4b012488"
+        val appid="0458de72757b2f04185abd9a4b012488"
 
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
@@ -355,7 +354,6 @@ class DateFragment : Fragment() {
 
                         val pastResponse=response.body()
                         val array=pastResponse.hourly_update
-                        var sbuilder=StringBuilder()
                         historyDataList.clear()
                         historyDataList.addAll(array)
                         pastDataAdapter!!.notifyDataSetChanged()
@@ -375,7 +373,8 @@ class DateFragment : Fragment() {
     }
     private fun loadCurrentData(lat:String,lng:String){
         lastUpdate=1
-        currentDataTextview.text= "Date :$m Location: $selectedCity"
+        val date="Date :$m Location: $selectedCity"
+        currentDataTextview.text= date
         val unit =getData(sharedPreferences,"unit")
         lastunitPreference=unit!!
 
@@ -399,15 +398,6 @@ class DateFragment : Fragment() {
                        responseList.clear()
                         responseList.add(weatherResponse)
                         dateAdapter!!.notifyDataSetChanged()
-                        val stringBuilder="Country :"+weatherResponse.sys!!.country+"\n"+
-                                "Temperature: "+weatherResponse.main!!.temp+"\n"+
-                                "Temperature(Min): "+weatherResponse.main!!.temp_min+unit+"\n"+
-                                "Temperature(Max): "+weatherResponse.main!!.temp_max+unit+"\n"+
-                                weatherResponse.weather!![0].description+"\n"
-                        "Humidity: "+weatherResponse.main!!.humudity+"\n"+
-                                "Pressure: "+weatherResponse.main!!.pressure
-                       // currentDataTextview.text=stringBuilder
-
                     }
                 }
                 else{

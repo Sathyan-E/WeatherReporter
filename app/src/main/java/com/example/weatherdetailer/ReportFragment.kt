@@ -15,13 +15,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Looper
-import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -43,9 +41,9 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class ReportFragment : Fragment() {
-    var unitType=""
-    var lastUsedUnit:String=""
-    lateinit var sharedPreferences: SharedPreferences
+    private var unitType=""
+    private var lastUsedUnit:String=""
+    private lateinit var sharedPreferences: SharedPreferences
     lateinit var reportTextView:TextView
     private var responseList:MutableList<WeatherResponse> = ArrayList()
     private lateinit var recyclerView: RecyclerView
@@ -53,9 +51,8 @@ class ReportFragment : Fragment() {
     private lateinit var progrssBar: ProgressBar
    private lateinit var screenshotView:LinearLayout
     private lateinit var shareButton: Button
-    private val PERMISSION_ID=1000
-    lateinit var fusedLocationClient : FusedLocationProviderClient
-    lateinit var locationRequest: LocationRequest
+    private lateinit var fusedLocationClient : FusedLocationProviderClient
+    private lateinit var locationRequest: LocationRequest
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,7 +79,7 @@ class ReportFragment : Fragment() {
         recyclerView.adapter=recyclerAdapter
         recyclerView.visibility=View.INVISIBLE
 
-        reportTextView = view.findViewById<TextView>(R.id.report)
+        reportTextView = view.findViewById(R.id.report)
 
         fusedLocationClient= LocationServices.getFusedLocationProviderClient(activity!!)
 
@@ -105,25 +102,25 @@ class ReportFragment : Fragment() {
                 PackageManager.PERMISSION_GRANTED)
 
             val bitmap= Bitmap.createBitmap(screenshotView.width,screenshotView.height, Bitmap.Config.ARGB_8888)
-            val canvas: Canvas = Canvas(bitmap)
+            val canvas = Canvas(bitmap)
             screenshotView.draw(canvas)
             //ssImageView.setImageBitmap(bitmap)
 
-            val  mainDirectoryname: File =
+            val  mainDirectoryname =
                 File(context!!.getExternalFilesDir(Environment.DIRECTORY_PICTURES),"ScreenShots")
             if (!mainDirectoryname.exists()){
                 if (mainDirectoryname.mkdirs()){
-                    Log.e("Create Directory","Main Directory created: "+mainDirectoryname)
+                    Log.e("Create Directory", "Main Directory created: $mainDirectoryname")
                 }
             }
 
             val name:String="screenshot"+ Calendar.getInstance().time.toString()+".jpg"
-            val dir : File = File(mainDirectoryname.absolutePath)
+            val dir  = File(mainDirectoryname.absolutePath)
             if (!dir.exists()){
                 dir.mkdirs()
             }
-            val imagefile: File = File(mainDirectoryname.absolutePath,name)
-            val outPutStream: FileOutputStream = FileOutputStream(imagefile)
+            val imagefile = File(mainDirectoryname.absolutePath,name)
+            val outPutStream = FileOutputStream(imagefile)
             bitmap.compress(Bitmap.CompressFormat.JPEG,100,outPutStream)
 
             Toast.makeText(activity,"FIle saved in directory",Toast.LENGTH_SHORT).show()
@@ -147,8 +144,8 @@ class ReportFragment : Fragment() {
             FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
 
         val intent= Intent()
-        intent.setAction(Intent.ACTION_SEND)
-        intent.setType("image/*")
+        intent.action = Intent.ACTION_SEND
+        intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_STREAM,fileuri)
         startActivity(Intent.createChooser(intent,"Share Screenshot"))
 
@@ -188,7 +185,7 @@ class ReportFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<MonthlyResponse>?, t: Throwable) {
-                reportTextView!!.text=t.message
+                reportTextView.text=t.message
             }
 
         })
@@ -243,11 +240,11 @@ class ReportFragment : Fragment() {
             recyclerView.visibility=View.INVISIBLE
     }
     private  fun getLastLocation():String{
-        var name:String=""
+        val name=""
         if(checkPermission()){
             if (isLocationEnabled()){
                 fusedLocationClient .lastLocation.addOnCompleteListener{task ->
-                    var location = task.result
+                    val location = task.result
                     if (location == null){
                         getNewLocation()
                     }else{
@@ -277,14 +274,14 @@ class ReportFragment : Fragment() {
             Toast.makeText(activity,"Problem in getting location permission",Toast.LENGTH_SHORT).show()
             return
         }
-        fusedLocationClient!!.requestLocationUpdates(
+        fusedLocationClient.requestLocationUpdates(
             locationRequest,locationCallback, Looper.myLooper()
         )
     }
 
     private  val locationCallback = object  : LocationCallback(){
         override fun onLocationResult(p0: LocationResult) {
-            var lastLocation =p0.lastLocation
+            val lastLocation =p0.lastLocation
            // save("lat",lastLocation.latitude.toString())
             //save("lat",lastLocation.longitude.toString())
 
@@ -295,7 +292,7 @@ class ReportFragment : Fragment() {
     }
     private fun checkPermission():Boolean{
         if (
-            ActivityCompat.checkSelfPermission(context!!,android.Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(context!!,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
             ActivityCompat.checkSelfPermission(context!!,Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         ){
             return true
@@ -311,22 +308,22 @@ class ReportFragment : Fragment() {
     }
 
     private  fun isLocationEnabled():Boolean{
-        var locationManager=activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationManager=activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
             LocationManager.NETWORK_PROVIDER)
     }
 
     private fun getCityName(lat:Double,long: Double) {
         var cityName=""
-        var geoCoder= Geocoder(activity, Locale.getDefault())
-        var addr=geoCoder.getFromLocation(lat,long,1)
+        val geoCoder= Geocoder(activity, Locale.getDefault())
+        val addr=geoCoder.getFromLocation(lat,long,1)
         cityName=addr.get(0).locality
         save("city",cityName)
         // cityTextView.text=cityName
     }
     private  fun save(key:String,value:String){
         val  sharedPreferences=activity!!.getSharedPreferences("weather",Context.MODE_PRIVATE)
-        var editor=sharedPreferences.edit()
+        val editor=sharedPreferences.edit()
         editor.putString(key,value)
         editor.apply()
 

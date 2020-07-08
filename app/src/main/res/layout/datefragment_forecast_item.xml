@@ -44,16 +44,14 @@
                         android:layout_height="0dp"
                         android:gravity="center"
                         android:textStyle="bold"
-                        android:layout_weight="1"
-                        android:text="London, GB" />
+                        android:layout_weight="1" />
 
                     <TextView
                         android:id="@+id/forecast_report_climate_description"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="top|center"
-                        android:text="Scattered Clouds" />
+                        android:gravity="top|center" />
 
                 </LinearLayout>
 
