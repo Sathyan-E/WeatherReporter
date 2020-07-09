@@ -43,16 +43,14 @@
                         android:layout_height="0dp"
                         android:gravity="center"
                         android:textStyle="bold"
-                        android:layout_weight="1"
-                        android:text="London, GB" />
+                        android:layout_weight="1" />
 
                     <TextView
                         android:id="@+id/past_report_climate_description"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="top|center"
-                        android:text="Scattered Clouds" />
+                        android:gravity="top|center" />
 
                 </LinearLayout>
 
@@ -82,7 +80,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="60F"
                         android:textSize="35sp"
                         android:textStyle="bold" />
 
@@ -98,7 +95,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:text="Details"
+                        android:text="@string/cardview_details"
                         android:gravity="bottom|center"
                         android:textStyle="bold" />
 
@@ -123,25 +120,25 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1"
-                                android:text="Feels like" />
+                                android:text="@string/cardview_feelslike" />
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1"
-                                android:text="Wind" />
+                                android:text="@string/cardview_wind" />
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1"
-                                android:text="Humidity" />
+                                android:text="@string/cardview_humidity" />
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1"
-                                android:text="Pressure" />
+                                android:text="@string/cardview_pressure" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -155,7 +152,6 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1"
-                                android:text="60F"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -163,7 +159,6 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1"
-                                android:text="19.5 m/h"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -171,7 +166,6 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1"
-                                android:text="51%"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -179,7 +173,6 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1"
-                                android:text="1013 hpa"
                                 android:textStyle="bold" />
 
                         </LinearLayout>
@@ -197,35 +190,9 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:gravity="center|end"
-                android:background="@color/vegasgold"
-                android:text="6 jul 2020" />
+                android:background="@color/vegasgold"/>
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
-
-
-
-
-
-    <TextView
-        android:id="@+id/main"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Main"
-        android:layout_margin="10dp"/>
-
-    <TextView
-        android:id="@+id/description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Description"
-        android:layout_margin="10dp"/>
-    <TextView
-        android:id="@+id/temp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Temperature"
-        android:layout_margin="10dp"/>
-
 
 </LinearLayout>

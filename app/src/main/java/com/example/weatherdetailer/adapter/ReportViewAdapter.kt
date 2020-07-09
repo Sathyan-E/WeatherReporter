@@ -26,28 +26,22 @@ class ReportViewAdapter(private val list:List<WeatherResponse>):RecyclerView.Ada
         val response:WeatherResponse=list[position]
         holder.mainDescription.text=response.weather[0].main
         holder.climateDescription.text=response.weather[0].description
-        var  icon:String= response.weather[0].icon.toString()
+        val icon:String= response.weather[0].icon.toString()
         Picasso.get().load("http://openweathermap.org/img/wn/$icon@2x.png").into(holder.climateIcon)
-       // var temp:String= response.main.temp.toString()
         holder.temperature.text= response.main!!.temp.toString()
         holder.feelflikeTemp.text=response.main!!.feels_like.toString()
-        var wind:String=response.wind!!.speed.toString()+"m/h"
+        val wind:String=response.wind!!.speed.toString()+"m/h"
         holder.windValue.text=wind
-        var humidity:String=response.main!!.humudity.toString()+"%"
+        val humidity:String=response.main!!.humudity.toString()+"%"
         holder.humidityValue.text=humidity
-        var pressure:String=response.main!!.pressure.toString()+"hPa"
+        val pressure:String=response.main!!.pressure.toString()+"hPa"
         holder.pressureValue.text=pressure
         holder.reportDate.text=response.date
-      /**
-        holder.dateTextView.text=list[position].date
-        holder.descriptionTextView.text=list[position].weather[0].description
-        holder.tempTextView?.text= list[position].main?.temp.toString()
-        **/
     }
 
-    class ReportViewHolder(private val containerView:View):RecyclerView.ViewHolder(containerView){
+    class ReportViewHolder(containerView:View):RecyclerView.ViewHolder(containerView){
         val mainDescription:TextView=containerView.report_main_description
-        val climateDescription=containerView.report_climate_description
+        val climateDescription: TextView =containerView.report_climate_description
         val climateIcon:ImageView=containerView.report_climate_image
         val temperature:TextView=containerView.report_city_temp
         val feelflikeTemp:TextView=containerView.report_city_feelslike_temp
@@ -56,11 +50,6 @@ class ReportViewAdapter(private val list:List<WeatherResponse>):RecyclerView.Ada
         val pressureValue:TextView=containerView.report_city_pressure
         val reportDate:TextView=containerView.report_date
 
-      /**
-        val dateTextView=containerView.date
-        val descriptionTextView=containerView.description
-        val tempTextView=containerView.temp
-        **/
     }
 
 }

@@ -23,5 +23,6 @@
     <string name="cardview_humidity">Humidity</string>
     <string name="cardview_pressure">Pressure</string>
     <string name="button_share">Share</string>
+    <string name="description">Description</string>
 
 </resources>
