@@ -15,6 +15,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationSet
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -175,6 +176,7 @@ class DateFragment : Fragment() {
 
                     loadForecast(selectedLat,selectedlon,m)
                 }else{
+
                     Toast.makeText(activity,"Select the place",Toast.LENGTH_SHORT).show()
                 }
             }
@@ -187,6 +189,7 @@ class DateFragment : Fragment() {
                     loadPastData(selectedLat,selectedlon,selectedDate)
                 }
                 else{
+
                     Toast.makeText(activity,"Select the place",Toast.LENGTH_SHORT).show()
                 }
 
@@ -225,6 +228,8 @@ class DateFragment : Fragment() {
 
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
+        val animationSet:AnimationSet= AnimationSet(true)
+
 
     }
     private fun shareScreenShot(imageFile:File){

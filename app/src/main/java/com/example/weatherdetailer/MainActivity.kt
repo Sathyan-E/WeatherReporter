@@ -25,23 +25,24 @@ class MainActivity : AppCompatActivity() {
 
 
         //binding views
-        val tablayout:TabLayout =findViewById(R.id.tabs)
-        viewPager2=findViewById(R.id.viewpager2)
-        //instantiating adapter
-        adapter= MyStateAdapter(this)
-        //setting adapter to viewpager2
-        viewPager2.adapter=adapter
-        //By default the user preference is celsius
-        save("unit","celsius")
-        //Array titles for tabs
-        val num= arrayOf("Current","Date","Report","Preference")
-        //Tab layout mediator
-        TabLayoutMediator(tablayout,viewPager2){tab, position ->
-            tab.text=num[position]
-        }.attach()
+       val tablayout:TabLayout =findViewById(R.id.tabs)
+       viewPager2=findViewById(R.id.viewpager2)
+       //instantiating adapter
+       adapter= MyStateAdapter(this)
+       //setting adapter to viewpager2
+       viewPager2.adapter=adapter
+       //By default the user preference is celsius
+       save("unit","celsius")
+       //Array titles for tabs
+       val num= arrayOf("Current","Date","Report","Preference")
+       //Tab layout mediator
+       TabLayoutMediator(tablayout,viewPager2){tab, position ->
+           tab.text=num[position]
+       }.attach()
 
 
-    }
+
+   }
 
 
     override fun onDestroy() {
@@ -64,12 +65,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        firebaseAuth.addAuthStateListener { authStateListener }
+        firebaseAuth.addAuthStateListener(authStateListener)
+
     }
 
     override fun onPause() {
         super.onPause()
-        firebaseAuth.removeAuthStateListener {authStateListener }
+        firebaseAuth.removeAuthStateListener(authStateListener)
     }
 
     override fun onStart() {
@@ -79,6 +81,7 @@ class MainActivity : AppCompatActivity() {
             val muser=firebaseAuth.currentUser
             if (muser!=null){
                 Toast.makeText(this,"You're now signed in.",Toast.LENGTH_SHORT).show()
+
             }else{
                 startActivityForResult(
                     AuthUI.getInstance()
