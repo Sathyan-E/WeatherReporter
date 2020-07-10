@@ -1,8 +1,12 @@
 package com.example.weatherdetailer
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.viewpager2.widget.ViewPager2
 import com.firebase.ui.auth.AuthUI
@@ -16,12 +20,13 @@ class MainActivity : AppCompatActivity() {
     lateinit var viewPager2: ViewPager2
     lateinit var firebaseAuth: FirebaseAuth
     lateinit var authStateListener:FirebaseAuth.AuthStateListener
-   // lateinit var menu:Menu
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
        firebaseAuth=FirebaseAuth.getInstance()
+        supportActionBar
 
 
         //binding views
@@ -93,6 +98,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode==10){
+            if (resultCode== Activity.RESULT_OK){
+                Toast.makeText(this,"You're Signed In",Toast.LENGTH_SHORT).show()
+            }
+            else if (resultCode== Activity.RESULT_CANCELED){
+                Toast.makeText(this,"Sign In Cancelled",Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_options,menu)
+        return true
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
+        if (item.itemId==R.id.sign_out){
+
+            AuthUI.getInstance().signOut(this)
+            Toast.makeText(this,"Sign out button clciked",Toast.LENGTH_SHORT).show()
+        }
+        return true
+    }
 }
