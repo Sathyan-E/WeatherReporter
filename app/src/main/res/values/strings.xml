@@ -14,7 +14,7 @@
     <string name="date">Date</string>
     <string name="report">Forecast Report</string>
     <string name="setting">Settings</string>
-    <string name="click">Click button to chage the unit of temperature"</string>
+    <string name="click">switch to change the unit of temperature"</string>
     <string name="celsius">Celsius</string>
     <string name="image_description_climate">Climate Description Image</string>
     <string name="cardview_details">Details</string>

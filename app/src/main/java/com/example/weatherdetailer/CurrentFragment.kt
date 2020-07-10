@@ -27,7 +27,9 @@ import androidx.fragment.app.Fragment
 //import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.weatherdetailer.network.WeatherResponse
 import com.example.weatherdetailer.network.WeatherService
+import com.firebase.ui.auth.AuthUI
 import com.google.android.gms.location.*
+import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
@@ -94,6 +96,7 @@ class CurrentFragment : Fragment(){
        //fusedlocationclient instantiation
         fusedLocationClient= LocationServices.getFusedLocationProviderClient(activity!!)
 
+
         //sharedpreference intantiating
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
         //attching onclick listner for share button to share the screenshot
@@ -140,6 +143,7 @@ class CurrentFragment : Fragment(){
             imagefile.delete()
 
         }
+
 
 
     }

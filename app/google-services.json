@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "845686603790",
+    "firebase_url": "https://weather-detailer.firebaseio.com",
+    "project_id": "weather-detailer",
+    "storage_bucket": "weather-detailer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:845686603790:android:f872ee9fa96603f8a4fc5f",
+        "android_client_info": {
+          "package_name": "com.example.weatherdetailer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "845686603790-2pr0ttie79jlghijak878tr2q1tq7b11.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.weatherdetailer",
+            "certificate_hash": "8fa8b04f75d3c6b5bc22814565a1cbac18e817a4"
+          }
+        },
+        {
+          "client_id": "845686603790-qlm2csrdsf0tuqnnrcstt4pqke7uv6o7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVX24HUD-6-c1K4QhtE-a28Ljz16qGuL8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "845686603790-qlm2csrdsf0tuqnnrcstt4pqke7uv6o7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
