@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.datefragment_pastdata_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class DatePastDataAdapter(private val list: List<Current>):RecyclerView.Adapter<DatePastDataAdapter.PastDataViewHolder>() {
+class DatePastDataAdapter(private val list: List<Current>,private var unit:String):RecyclerView.Adapter<DatePastDataAdapter.PastDataViewHolder>() {
 
 
 
@@ -49,9 +49,10 @@ class PastDataViewHolder(containerView:View):RecyclerView.ViewHolder(containerVi
         holder.pastClimateDescription.text=response.weather[0].description
         val icon:String= response.weather[0].icon.toString()
         Picasso.get().load("http://openweathermap.org/img/wn/$icon@2x.png").into(holder.pastClimateIcon)
-        // var temp:String= response.main.temp.toString()
-        holder.pastTemperature.text= response.temp.toString()
-        holder.pastFeellikeTemp.text=response.feels_like.toString()
+        val temp:String= response.temp.toString()+unit
+        holder.pastTemperature.text=temp
+        val fTemp=response.feels_like.toString()+unit
+        holder.pastFeellikeTemp.text=fTemp
         val wind:String=response.w_speed.toString()+"m/h"
         holder.pastWindValue.text=wind
         val humidity:String=response.humiidity.toString()+"%"
@@ -64,5 +65,9 @@ class PastDataViewHolder(containerView:View):RecyclerView.ViewHolder(containerVi
         val currrentday:String= sdf.format(date)
         holder.pastReportDate.text=currrentday
         
+    }
+
+    public fun setUnit(s:String){
+        unit=s
     }
 }

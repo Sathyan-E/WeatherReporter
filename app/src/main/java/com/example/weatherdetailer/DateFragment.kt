@@ -70,6 +70,7 @@ class DateFragment : Fragment() {
     private var lastunitPreference:String=""
     private lateinit var shareButton: Button
     private lateinit var sharingLayout: LinearLayout
+    public var currentUnit=""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -134,12 +135,9 @@ class DateFragment : Fragment() {
 
 
 
-        dateAdapter= DateForecastAdapter(responseList)
-        pastDataAdapter= DatePastDataAdapter(historyDataList)
-
-//        val nameTextView=view.findViewById<TextView>(R.id.usrnmeDate)
+        dateAdapter= DateForecastAdapter(responseList,currentUnit)
+        pastDataAdapter= DatePastDataAdapter(historyDataList,currentUnit)
         calendarView=view.findViewById(R.id.calenderView)
-
 
         val date=calendarView.date
         val min=date-432000000
@@ -147,7 +145,6 @@ class DateFragment : Fragment() {
 
         calendarView.minDate=min
         calendarView.maxDate=max
-
         calendarView.setOnDateChangeListener{ view, year, month, dayOfMonth ->
 
             m= "$year-"
@@ -233,15 +230,7 @@ class DateFragment : Fragment() {
 
     }
     private fun shareScreenShot(imageFile:File){
-        // val shareIntent=Intent()
-        //shareIntent.setAction(Intent.ACTION_VIEW)
-        //val uri:Uri= Uri.fromFile(imageFile)
-        //shareIntent.setDataAndType(uri,"image/*")
-        //startActivity(shareIntent)
-        //
-        val fileuri: Uri =
-            FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
-
+        val fileuri: Uri = FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
         val intent= Intent()
         intent.action = Intent.ACTION_SEND
         intent.type = "image/*"
@@ -268,15 +257,9 @@ class DateFragment : Fragment() {
         lastUpdate=2
         val date= "Date :$m Location: $selectedCity"
         currentDataTextview.text=date
-        val unit =getData(sharedPreferences,"unit")
-        lastunitPreference=unit!!
 
-        if(unit=="celsius"){
-            unitType="metric"
-        }
-        else if(unit=="farenheit"){
-            unitType="imperial"
-        }
+        findUnit()
+        dateAdapter!!.setUnit(currentUnit)
 
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
@@ -297,7 +280,7 @@ class DateFragment : Fragment() {
                         for(i in list){
                             val dateString:String=weatherResponse.list[num].date.toString().substring(0,10)
                             if(day==dateString){
-                                Toast.makeText(activity,"date checking works",Toast.LENGTH_SHORT).show()
+                                //Toast.makeText(activity,"date checking works",Toast.LENGTH_SHORT).show()
                                 array.add(weatherResponse.list[num])
                             }
                             num++
@@ -328,15 +311,9 @@ class DateFragment : Fragment() {
         lastUpdate=0
         val date= "Date :$m Location: $selectedCity"
         currentDataTextview.text=date
-        val unit =getData(sharedPreferences,"unit")
-        lastunitPreference=unit!!
 
-        if(unit=="celsius"){
-            unitType="metric"
-        }
-        else if(unit=="farenheit"){
-            unitType="imperial"
-        }
+        findUnit()
+        pastDataAdapter!!.setUnit(currentUnit)
 
         val appid="0458de72757b2f04185abd9a4b012488"
 
@@ -347,7 +324,7 @@ class DateFragment : Fragment() {
         reportCall.enqueue(object : Callback<PastResponse> {
             override fun onFailure(call: Call<PastResponse>?, t: Throwable?) {
                 if (t != null) {
-                   // weatherTextView.text=t.message
+
                     Toast.makeText(activity,""+t.message,Toast.LENGTH_SHORT).show()
                 }
             }
@@ -380,15 +357,10 @@ class DateFragment : Fragment() {
         lastUpdate=1
         val date="Date :$m Location: $selectedCity"
         currentDataTextview.text= date
-        val unit =getData(sharedPreferences,"unit")
-        lastunitPreference=unit!!
 
-        if(unit=="celsius"){
-            unitType="metric"
-        }
-        else if(unit=="farenheit"){
-            unitType="imperial"
-        }
+        findUnit()
+        dateAdapter!!.setUnit(currentUnit)
+       
 
         val retrofit=Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = retrofit.create(WeatherService::class.java)
@@ -416,6 +388,19 @@ class DateFragment : Fragment() {
             }
         })
 
+
+    }
+    private fun findUnit(){
+        val unit =getData(sharedPreferences,"unit")
+        lastunitPreference=unit!!
+        if(unit=="celsius"){
+            unitType="metric"
+            currentUnit="C"
+        }
+        else if(unit=="farenheit"){
+            unitType="imperial"
+            currentUnit="F"
+        }
 
     }
 

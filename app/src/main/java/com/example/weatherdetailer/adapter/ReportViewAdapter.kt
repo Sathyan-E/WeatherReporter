@@ -11,7 +11,7 @@ import com.example.weatherdetailer.network.WeatherResponse
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.reportlayoutitem.view.*
 
-class ReportViewAdapter(private val list:List<WeatherResponse>):RecyclerView.Adapter<ReportViewAdapter.ReportViewHolder>() {
+class ReportViewAdapter(private val list:List<WeatherResponse>,private  var unit:String):RecyclerView.Adapter<ReportViewAdapter.ReportViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportViewHolder {
         val view=LayoutInflater.from(parent.context).inflate(R.layout.reportlayoutitem,parent,false)
@@ -28,8 +28,10 @@ class ReportViewAdapter(private val list:List<WeatherResponse>):RecyclerView.Ada
         holder.climateDescription.text=response.weather[0].description
         val icon:String= response.weather[0].icon.toString()
         Picasso.get().load("http://openweathermap.org/img/wn/$icon@2x.png").into(holder.climateIcon)
-        holder.temperature.text= response.main!!.temp.toString()
-        holder.feelflikeTemp.text=response.main!!.feels_like.toString()
+        val temp=response.main!!.temp.toString()+unit
+        holder.temperature.text= temp
+        val feelsLike=response.main!!.feels_like.toString()+unit
+        holder.feelflikeTemp.text=feelsLike
         val wind:String=response.wind!!.speed.toString()+"m/h"
         holder.windValue.text=wind
         val humidity:String=response.main!!.humudity.toString()+"%"
@@ -50,6 +52,9 @@ class ReportViewAdapter(private val list:List<WeatherResponse>):RecyclerView.Ada
         val pressureValue:TextView=containerView.report_city_pressure
         val reportDate:TextView=containerView.report_date
 
+    }
+    public fun setTempUnit(s : String){
+        unit=s
     }
 
 }

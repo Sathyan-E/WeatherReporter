@@ -60,11 +60,7 @@ class CurrentFragment : Fragment(){
     private lateinit var presentClimateStateImage:ImageView
     private lateinit var cardView:CardView
     private lateinit var progressBar: ProgressBar
-  //  private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-   // private lateinit var ssImageView: ImageView
     private lateinit var shareButton:Button
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -96,12 +92,10 @@ class CurrentFragment : Fragment(){
        //fusedlocationclient instantiation
         fusedLocationClient= LocationServices.getFusedLocationProviderClient(activity!!)
 
-
         //sharedpreference intantiating
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
         //attching onclick listner for share button to share the screenshot
         shareButton.isEnabled=false
-
 
         shareButton.setOnClickListener {
            Toast.makeText(activity,"Button CLicked",Toast.LENGTH_SHORT).show()
@@ -191,9 +185,9 @@ class CurrentFragment : Fragment(){
                         shareButton.isEnabled=true
                         presentCityName.text=weatherResponse.name
                         presentCityDescription.text=weatherResponse.weather[0].description
-                        val temp:String=weatherResponse.main!!.temp.toString()+" "+u
+                        val temp:String=weatherResponse.main!!.temp.toString()+u
                         presentCitytemp.text= temp
-                        val fTemp:String=weatherResponse.main!!.feels_like.toString()+" "+u
+                        val fTemp:String=weatherResponse.main!!.feels_like.toString()+u
                         presentCityFeelsLikeTemp.text=fTemp
                         val wind:String=weatherResponse.wind!!.speed.toString()+" m/h"
                         presentCityWind.text=wind

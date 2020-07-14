@@ -11,7 +11,7 @@ import com.example.weatherdetailer.network.WeatherResponse
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.datefragment_forecast_item.view.*
 
-class DateForecastAdapter (private  val list:List<WeatherResponse>):RecyclerView.Adapter<DateForecastAdapter.ForecastDataViewHolder>(){
+class DateForecastAdapter (private  val list:List<WeatherResponse>,private var unit:String):RecyclerView.Adapter<DateForecastAdapter.ForecastDataViewHolder>(){
 
     class ForecastDataViewHolder(containerView:View):RecyclerView.ViewHolder(containerView){
 
@@ -38,19 +38,16 @@ class DateForecastAdapter (private  val list:List<WeatherResponse>):RecyclerView
     }
 
     override fun onBindViewHolder(holder:ForecastDataViewHolder, position: Int) {
-        /**
-        holder.dateTextView.text=list[position].date
-        holder.descriptionTextView.text=list[position].weather[0].description
-        holder.tempTextView?.text= list[position].main?.temp.toString()
-        **/
+
         val response: WeatherResponse =list[position]
         holder.forecastMainDescription.text=response.weather[0].main
         holder.forecastClimateDescription.text=response.weather[0].description
         val icon:String= response.weather[0].icon.toString()
         Picasso.get().load("http://openweathermap.org/img/wn/$icon@2x.png").into(holder.forecastClimateIcon)
-        // var temp:String= response.main.temp.toString()
-        holder.forecastTemperature.text= response.main!!.temp.toString()
-        holder.forecastFeellikeTemp.text=response.main!!.feels_like.toString()
+        val temp:String= response.main!!.temp.toString()+unit
+        holder.forecastTemperature.text= temp
+        val feelslike=response.main!!.feels_like.toString()+ unit
+        holder.forecastFeellikeTemp.text=feelslike
         val wind:String=response.wind!!.speed.toString()+"m/h"
         holder.forecastWindValue.text=wind
         val humidity:String=response.main!!.humudity.toString()+"%"
@@ -60,5 +57,8 @@ class DateForecastAdapter (private  val list:List<WeatherResponse>):RecyclerView
         holder.forecastReportDate.text=response.date
 
 
+    }
+    public fun setUnit(u:String){
+        unit=u
     }
 }

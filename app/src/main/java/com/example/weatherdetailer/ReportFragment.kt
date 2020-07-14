@@ -53,6 +53,7 @@ class ReportFragment : Fragment() {
     private lateinit var shareButton: Button
     private lateinit var fusedLocationClient : FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
+    private var cUnit=""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,7 +76,7 @@ class ReportFragment : Fragment() {
         shareButton=view.findViewById(R.id.report_sharing_button)
 
         recyclerView.layoutManager=LinearLayoutManager(context)
-        recyclerAdapter= ReportViewAdapter(responseList)
+        recyclerAdapter= ReportViewAdapter(responseList,cUnit)
         recyclerView.adapter=recyclerAdapter
         recyclerView.visibility=View.INVISIBLE
 
@@ -203,12 +204,15 @@ class ReportFragment : Fragment() {
                 progrssBar.visibility=View.VISIBLE
                 if(unit=="celsius"){
                     unitType="metric"
+                    cUnit="C"
                     lastUsedUnit="celsius"
                 }
                 else if(unit=="farenheit"){
                     unitType="imperial"
+                    cUnit="F"
                     lastUsedUnit="farenheit"
                 }
+                recyclerAdapter!!.setTempUnit(cUnit)
 
                 getLastLocation()
 
