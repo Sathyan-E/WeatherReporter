@@ -29,7 +29,13 @@ import com.example.weatherdetailer.adapter.ReportViewAdapter
 import com.example.weatherdetailer.network.MonthlyResponse
 import com.example.weatherdetailer.network.WeatherResponse
 import com.example.weatherdetailer.network.WeatherService
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.*
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -54,6 +60,9 @@ class ReportFragment : Fragment() {
     private lateinit var fusedLocationClient : FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private var cUnit=""
+    private lateinit var autocompleteFragment:AutocompleteSupportFragment
+    private  var selectedLat:String=""
+    private  var selectedLon:String=""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -89,6 +98,12 @@ class ReportFragment : Fragment() {
 
 
         val city: String? = getData(sharedPreferences,"city")
+
+        Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
+        var placesClient= Places.createClient(context!!)
+        autocompleteFragment=childFragmentManager.findFragmentById(R.id.report_autocomplete_fragment) as AutocompleteSupportFragment
+        autocompleteFragment.setTypeFilter(TypeFilter.CITIES)
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.LAT_LNG, Place.Field.NAME))
 
         //nameTextView.text=user
         cityTextView.text=city
@@ -132,17 +147,24 @@ class ReportFragment : Fragment() {
 
         }
 
+        autocompleteFragment.setOnPlaceSelectedListener(object :PlaceSelectionListener{
+            override fun onPlaceSelected(p0: Place) {
+                Toast.makeText(activity,"LATLNG is"+p0.latLng,Toast.LENGTH_SHORT).show()
+                selectedLat=p0.latLng!!.latitude.toString()
+                selectedLon=p0.latLng!!.longitude.toString()
+                loadData(selectedLat,selectedLon)
+            }
+
+            override fun onError(p0: Status) {
+
+            }
+
+        })
+
     }
 
     private fun shareScreenShot(imageFile:File){
-        // val shareIntent=Intent()
-        //shareIntent.setAction(Intent.ACTION_VIEW)
-        //val uri:Uri= Uri.fromFile(imageFile)
-        //shareIntent.setDataAndType(uri,"image/*")
-        //startActivity(shareIntent)
-        //
-        val fileuri: Uri =
-            FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
+        val fileuri: Uri = FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
 
         val intent= Intent()
         intent.action = Intent.ACTION_SEND
@@ -150,13 +172,11 @@ class ReportFragment : Fragment() {
         intent.putExtra(Intent.EXTRA_STREAM,fileuri)
         startActivity(Intent.createChooser(intent,"Share Screenshot"))
 
-
     }
 
     private fun loadData(lat:String,lon:String){
 
-        //val lat=getData(sharedPreferences,"lat")
-        //val lon=getData(sharedPreferences,"lon")
+        findUnit()
 
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
@@ -196,25 +216,14 @@ class ReportFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         val unit =getData(sharedPreferences,"unit")
-
-
         val isConnected=isInternetConnected()
         if (isConnected){
             if(lastUsedUnit!=unit){
-                progrssBar.visibility=View.VISIBLE
-                if(unit=="celsius"){
-                    unitType="metric"
-                    cUnit="C"
-                    lastUsedUnit="celsius"
-                }
-                else if(unit=="farenheit"){
-                    unitType="imperial"
-                    cUnit="F"
-                    lastUsedUnit="farenheit"
-                }
-                recyclerAdapter!!.setTempUnit(cUnit)
-
-                getLastLocation()
+               if (selectedLat!=""){
+                   loadData(selectedLat,selectedLon)
+               }else{
+                   Toast.makeText(activity,"Select place for report",Toast.LENGTH_SHORT).show()
+               }
 
             }
             else{
@@ -227,6 +236,21 @@ class ReportFragment : Fragment() {
             Toast.makeText(activity,"No Internet Connection!",Toast.LENGTH_SHORT).show()
         }
 
+
+    }
+    private fun findUnit(){
+        val unit =getData(sharedPreferences,"unit")
+
+        if(unit=="celsius"){
+            unitType="metric"
+            cUnit="C"
+            lastUsedUnit="celsius"
+        }
+        else if(unit=="farenheit"){
+            unitType="imperial"
+            cUnit="F"
+            lastUsedUnit="farenheit"
+        }
 
     }
     private  fun getData(shared:SharedPreferences,string: String): String? {
@@ -243,6 +267,7 @@ class ReportFragment : Fragment() {
             super.onPause()
             recyclerView.visibility=View.INVISIBLE
     }
+   /**
     private  fun getLastLocation():String{
         val name=""
         if(checkPermission()){
@@ -325,6 +350,7 @@ class ReportFragment : Fragment() {
         save("city",cityName)
         // cityTextView.text=cityName
     }
+    **/
     private  fun save(key:String,value:String){
         val  sharedPreferences=activity!!.getSharedPreferences("weather",Context.MODE_PRIVATE)
         val editor=sharedPreferences.edit()
