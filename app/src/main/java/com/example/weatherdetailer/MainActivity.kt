@@ -13,6 +13,7 @@ import com.firebase.ui.auth.AuthUI
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.iid.FirebaseInstanceId
 
 
 class MainActivity : AppCompatActivity() {
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity() {
            tab.text=num[position]
        }.attach()
 
-
+      //  FirebaseInstanceId.getInstance().instanceId
 
    }
 

@@ -63,7 +63,7 @@ class ReportFragment : Fragment() {
     private lateinit var autocompleteFragment:AutocompleteSupportFragment
     private  var selectedLat:String=""
     private  var selectedLon:String=""
-
+    //val placesApi=PlacesAPI.Builder().apikey("AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k").build(activity)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
