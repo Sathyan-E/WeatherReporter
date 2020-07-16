@@ -63,6 +63,7 @@ class ReportFragment : Fragment() {
     private lateinit var autocompleteFragment:AutocompleteSupportFragment
     private  var selectedLat:String=""
     private  var selectedLon:String=""
+    private lateinit var cityTextView:TextView
     //val placesApi=PlacesAPI.Builder().apikey("AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k").build(activity)
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -79,7 +80,7 @@ class ReportFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         //val nameTextView=view.findViewById<TextView>(R.id.usrnmeReport)
-        val cityTextView=view.findViewById<TextView>(R.id.city)
+        cityTextView=view.findViewById<TextView>(R.id.city)
         recyclerView=view.findViewById(R.id.recyclerview)
         screenshotView=view.findViewById(R.id.report_sharing_layout)
         shareButton=view.findViewById(R.id.report_sharing_button)
@@ -97,7 +98,7 @@ class ReportFragment : Fragment() {
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
 
 
-        val city: String? = getData(sharedPreferences,"city")
+       // val city: String? = getData(sharedPreferences,"city")
 
         Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
         var placesClient= Places.createClient(context!!)
@@ -106,9 +107,10 @@ class ReportFragment : Fragment() {
         autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.LAT_LNG, Place.Field.NAME))
 
         //nameTextView.text=user
-        cityTextView.text=city
+       // cityTextView.text=city
 
         progrssBar=view.findViewById(R.id.report_progressbar)
+        progrssBar.visibility=View.INVISIBLE
 
         shareButton.setOnClickListener {
             Toast.makeText(activity,"sharing the screenshot",Toast.LENGTH_SHORT).show()
@@ -152,6 +154,8 @@ class ReportFragment : Fragment() {
                 Toast.makeText(activity,"LATLNG is"+p0.latLng,Toast.LENGTH_SHORT).show()
                 selectedLat=p0.latLng!!.latitude.toString()
                 selectedLon=p0.latLng!!.longitude.toString()
+                progrssBar.visibility=View.VISIBLE
+                cityTextView.text=p0.name
                 loadData(selectedLat,selectedLon)
             }
 
@@ -217,8 +221,9 @@ class ReportFragment : Fragment() {
         super.onResume()
         val unit =getData(sharedPreferences,"unit")
         val isConnected=isInternetConnected()
-        if (isConnected){
-            if(lastUsedUnit!=unit){
+        if ( lastUsedUnit!=unit){
+            progrssBar.visibility=View.VISIBLE
+            if(isConnected){
                if (selectedLat!=""){
                    loadData(selectedLat,selectedLon)
                }else{
@@ -227,13 +232,14 @@ class ReportFragment : Fragment() {
 
             }
             else{
-                recyclerView.visibility=View.VISIBLE
+                progrssBar.visibility=View.INVISIBLE
+                Toast.makeText(activity,"No Internet Connection!",Toast.LENGTH_SHORT).show()
             }
 
         }
         else{
-            progrssBar.visibility=View.INVISIBLE
-            Toast.makeText(activity,"No Internet Connection!",Toast.LENGTH_SHORT).show()
+            recyclerView.visibility=View.VISIBLE
+
         }
 
 

@@ -61,7 +61,7 @@ class CurrentFragment : Fragment(){
     private lateinit var cardView:CardView
     private lateinit var progressBar: ProgressBar
     private lateinit var shareButton:Button
-
+    private var lastUnit=""
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -138,8 +138,6 @@ class CurrentFragment : Fragment(){
 
         }
 
-
-
     }
     private fun shareScreenShot(imageFile:File){
        //fetching the image uri
@@ -167,9 +165,11 @@ class CurrentFragment : Fragment(){
         if (unit=="celsius"){
             unitType="metric"
             u=" C"
+            lastUnit="celsius"
         }else if(unit=="farenheit"){
             unitType="imperial"
             u=" F"
+            lastUnit="farenheit"
         }
         //api call
         val call = service.getCurrentWeatherData(lat,lon,"0458de72757b2f04185abd9a4b012488",unitType)
@@ -219,7 +219,12 @@ class CurrentFragment : Fragment(){
 
     override fun onResume() {
         super.onResume()
-        refresh()
+        val unit:String? =getData(sharedPreferences,"unit")
+        if (lastUnit!=unit){
+            progressBar.visibility=View.VISIBLE
+            refresh()
+        }
+
     }
     fun refresh(){
         val isConnected=isInternetConnected()
@@ -228,7 +233,7 @@ class CurrentFragment : Fragment(){
         }else{
             progressBar.visibility=View.INVISIBLE
             cardView.visibility=View.INVISIBLE
-            Toast.makeText(activity,"Turn On Internet Connection!",Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity,"No Internet Connection!",Toast.LENGTH_SHORT).show()
         }
 
     }
