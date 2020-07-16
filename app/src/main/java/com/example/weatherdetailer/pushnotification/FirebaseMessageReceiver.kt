@@ -63,4 +63,9 @@ class FirebaseMessageReceiver: FirebaseMessagingService() {
         remoteViews.setImageViewResource(R.id.notification_icon,R.drawable.ic_launcher_background)
         return remoteViews
     }
+
+    override fun onNewToken(p0: String) {
+        super.onNewToken(p0)
+
+    }
 }
