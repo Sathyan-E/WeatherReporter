@@ -110,7 +110,7 @@ class ReportFragment : Fragment() {
        // cityTextView.text=city
 
         progrssBar=view.findViewById(R.id.report_progressbar)
-        progrssBar.visibility=View.INVISIBLE
+       // progrssBar.visibility=View.INVISIBLE
 
         shareButton.setOnClickListener {
             Toast.makeText(activity,"sharing the screenshot",Toast.LENGTH_SHORT).show()
@@ -222,11 +222,12 @@ class ReportFragment : Fragment() {
         val unit =getData(sharedPreferences,"unit")
         val isConnected=isInternetConnected()
         if ( lastUsedUnit!=unit){
-            progrssBar.visibility=View.VISIBLE
+       //     progrssBar.visibility=View.VISIBLE
             if(isConnected){
                if (selectedLat!=""){
                    loadData(selectedLat,selectedLon)
                }else{
+                   progrssBar.visibility=View.INVISIBLE
                    Toast.makeText(activity,"Select place for report",Toast.LENGTH_SHORT).show()
                }
 
