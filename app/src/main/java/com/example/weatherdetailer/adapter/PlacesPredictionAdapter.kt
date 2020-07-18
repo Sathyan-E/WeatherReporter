@@ -14,7 +14,7 @@ class PlacesPredictionAdapter(val list:ArrayList<AutocompletePrediction>,var cli
         val placeTextView: TextView =itemview.findViewById(R.id.place_name)
 
         fun initialize(item: AutocompletePrediction, listener:OnPlaceClickListener){
-            placeTextView.text=item.toString()
+            placeTextView.text=item.getFullText(null).toString()
 
             itemView.setOnClickListener{
                 listener.onItemClick(item,adapterPosition)

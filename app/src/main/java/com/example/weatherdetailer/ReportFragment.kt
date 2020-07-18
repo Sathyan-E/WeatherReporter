@@ -81,6 +81,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
     private lateinit var placeAdapter: PlacesPredictionAdapter
     private lateinit var placesClient: PlacesClient
     private lateinit var listener:OnPlaceClickListener
+    private lateinit var linearLayout: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -105,12 +106,16 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
         placesRecyclerView=view.findViewById(R.id.places_list_recyclervew)
 
         placesRecyclerView.layoutManager=LinearLayoutManager(context)
-        placeAdapter= PlacesPredictionAdapter(placeList,listener)
+        placeAdapter= PlacesPredictionAdapter(placeList,this)
+        placesRecyclerView.adapter=placeAdapter
 
         recyclerView.layoutManager=LinearLayoutManager(context)
         recyclerAdapter= ReportViewAdapter(responseList,cUnit)
         recyclerView.adapter=recyclerAdapter
         recyclerView.visibility=View.INVISIBLE
+        linearLayout=view.findViewById(R.id.report_sharing_layout)
+       // linearLayout.visibility=View.INVISIBLE
+        //listener=OnPlaceClickListener()
 
         reportTextView = view.findViewById(R.id.report)
 
@@ -124,7 +129,6 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
         if (!Places.isInitialized()){
             Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
         }
-
 
         placesClient= Places.createClient(context!!)
         autocompleteFragment=childFragmentManager.findFragmentById(R.id.report_autocomplete_fragment) as AutocompleteSupportFragment
@@ -353,10 +357,12 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
 
     override fun onItemClick(place: AutocompletePrediction, pos: Int) {
       //  result.text=place.placeId
+       // search.text=place.getPrimaryText(null).toString()
         val placeField= listOf(Place.Field.ID,Place.Field.NAME,Place.Field.LAT_LNG)
         val request= FetchPlaceRequest.newInstance(place.placeId,placeField)
         placesClient.fetchPlace(request).addOnSuccessListener { response: FetchPlaceResponse ->
             val place=response.place
+            loadData(place.latLng!!.latitude.toString(),place.latLng!!.longitude.toString())
             Toast.makeText(activity,"Place name"+place.latLng,Toast.LENGTH_SHORT).show()
         }.addOnFailureListener { exception: Exception ->
             Toast.makeText(activity,"Place not found: ${exception.message}",Toast.LENGTH_SHORT).show()
