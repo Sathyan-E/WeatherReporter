@@ -15,6 +15,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -25,15 +27,21 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.weatherdetailer.adapter.OnPlaceClickListener
+import com.example.weatherdetailer.adapter.PlacesPredictionAdapter
 import com.example.weatherdetailer.adapter.ReportViewAdapter
 import com.example.weatherdetailer.network.MonthlyResponse
 import com.example.weatherdetailer.network.WeatherResponse
 import com.example.weatherdetailer.network.WeatherService
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.model.*
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.FetchPlaceResponse
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import retrofit2.Call
@@ -43,10 +51,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.Exception
+import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ReportFragment : Fragment() {
+class ReportFragment : Fragment(),OnPlaceClickListener   {
     private var unitType=""
     private var lastUsedUnit:String=""
     private lateinit var sharedPreferences: SharedPreferences
@@ -65,6 +75,13 @@ class ReportFragment : Fragment() {
     private  var selectedLon:String=""
     private lateinit var cityTextView:TextView
     //val placesApi=PlacesAPI.Builder().apikey("AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k").build(activity)
+    private lateinit var search:EditText
+    private var placeList:ArrayList<AutocompletePrediction> = ArrayList()
+    private lateinit var placesRecyclerView: RecyclerView
+    private lateinit var placeAdapter: PlacesPredictionAdapter
+    private lateinit var placesClient: PlacesClient
+    private lateinit var listener:OnPlaceClickListener
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -84,6 +101,11 @@ class ReportFragment : Fragment() {
         recyclerView=view.findViewById(R.id.recyclerview)
         screenshotView=view.findViewById(R.id.report_sharing_layout)
         shareButton=view.findViewById(R.id.report_sharing_button)
+        search=view.findViewById(R.id.search)
+        placesRecyclerView=view.findViewById(R.id.places_list_recyclervew)
+
+        placesRecyclerView.layoutManager=LinearLayoutManager(context)
+        placeAdapter= PlacesPredictionAdapter(placeList,listener)
 
         recyclerView.layoutManager=LinearLayoutManager(context)
         recyclerAdapter= ReportViewAdapter(responseList,cUnit)
@@ -99,9 +121,12 @@ class ReportFragment : Fragment() {
 
 
        // val city: String? = getData(sharedPreferences,"city")
+        if (!Places.isInitialized()){
+            Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
+        }
 
-        Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
-        var placesClient= Places.createClient(context!!)
+
+        placesClient= Places.createClient(context!!)
         autocompleteFragment=childFragmentManager.findFragmentById(R.id.report_autocomplete_fragment) as AutocompleteSupportFragment
         autocompleteFragment.setTypeFilter(TypeFilter.CITIES)
         autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.LAT_LNG, Place.Field.NAME))
@@ -165,6 +190,46 @@ class ReportFragment : Fragment() {
 
         })
 
+        search.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                val token= AutocompleteSessionToken.newInstance()
+                val bound= RectangularBounds.newInstance(
+                    LatLng(0.0,0.0), LatLng(0.0,0.0))
+                val request= FindAutocompletePredictionsRequest.builder()
+                    .setLocationBias(bound)
+                    .setTypeFilter(TypeFilter.CITIES)
+                    .setSessionToken(token)
+                    .setQuery(search.text.toString()).build()
+
+                placesClient.findAutocompletePredictions(request).addOnSuccessListener { findAutocompletePredictionsResponse ->
+                    //sBuilder= StringBuilder()
+                    placeList.clear()
+                    for(prediction:AutocompletePrediction in findAutocompletePredictionsResponse.autocompletePredictions){
+                       placeList.add(prediction)
+                        //sBuilder.append(" ").append(prediction.getFullText(null)).toString()+"\n"
+                        Toast.makeText(activity,"Place ID is"+prediction.getFullText(null),Toast.LENGTH_SHORT).show()
+                    }
+                    placeAdapter.notifyDataSetChanged()
+
+
+                }.addOnFailureListener{
+                    Toast.makeText(activity,"add failure listener",Toast.LENGTH_SHORT).show()
+                }
+
+
+
+            }
+
+        })
+
     }
 
     private fun shareScreenShot(imageFile:File){
@@ -219,17 +284,20 @@ class ReportFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        refreshReport()
+    }
+   public fun refreshReport(){
         val unit =getData(sharedPreferences,"unit")
         val isConnected=isInternetConnected()
         if ( lastUsedUnit!=unit){
-       //     progrssBar.visibility=View.VISIBLE
+            //     progrssBar.visibility=View.VISIBLE
             if(isConnected){
-               if (selectedLat!=""){
-                   loadData(selectedLat,selectedLon)
-               }else{
-                   progrssBar.visibility=View.INVISIBLE
-                   Toast.makeText(activity,"Select place for report",Toast.LENGTH_SHORT).show()
-               }
+                if (selectedLat!=""){
+                    loadData(selectedLat,selectedLon)
+                }else{
+                    progrssBar.visibility=View.INVISIBLE
+                    Toast.makeText(activity,"Select place for report",Toast.LENGTH_SHORT).show()
+                }
 
             }
             else{
@@ -274,90 +342,7 @@ class ReportFragment : Fragment() {
             super.onPause()
             recyclerView.visibility=View.INVISIBLE
     }
-   /**
-    private  fun getLastLocation():String{
-        val name=""
-        if(checkPermission()){
-            if (isLocationEnabled()){
-                fusedLocationClient .lastLocation.addOnCompleteListener{task ->
-                    val location = task.result
-                    if (location == null){
-                        getNewLocation()
-                    }else{
-                       // save("lat",location.latitude.toString())
-                        //save("lon",location.longitude.toString())
-                        getCityName(location.latitude,location.longitude)
-                        loadData(location.latitude.toString(),location.longitude.toString())
-                    }
-                }
 
-            }else{
-                Toast.makeText(activity,"Please Enable Your Location Service!",Toast.LENGTH_SHORT).show()
-            }
-
-        }else{
-            requestPermission()
-        }
-        return name
-    }
-    private  fun getNewLocation(){
-        locationRequest= LocationRequest()
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        locationRequest.interval=0
-        locationRequest.fastestInterval=0
-        locationRequest.numUpdates=2
-        if (ActivityCompat.checkSelfPermission(activity!!, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(activity!!, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(activity,"Problem in getting location permission",Toast.LENGTH_SHORT).show()
-            return
-        }
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,locationCallback, Looper.myLooper()
-        )
-    }
-
-    private  val locationCallback = object  : LocationCallback(){
-        override fun onLocationResult(p0: LocationResult) {
-            val lastLocation =p0.lastLocation
-           // save("lat",lastLocation.latitude.toString())
-            //save("lat",lastLocation.longitude.toString())
-
-            getCityName(lastLocation.latitude,lastLocation.longitude)
-           loadData(lastLocation.latitude.toString(),lastLocation.longitude.toString())
-
-        }
-    }
-    private fun checkPermission():Boolean{
-        if (
-            ActivityCompat.checkSelfPermission(context!!,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(context!!,Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ){
-            return true
-        }
-        return false
-    }
-
-    private  fun requestPermission(){
-        ActivityCompat.requestPermissions(
-            activity!!,
-            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),1
-        )
-    }
-
-    private  fun isLocationEnabled():Boolean{
-        val locationManager=activity!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER)
-    }
-
-    private fun getCityName(lat:Double,long: Double) {
-        var cityName=""
-        val geoCoder= Geocoder(activity, Locale.getDefault())
-        val addr=geoCoder.getFromLocation(lat,long,1)
-        cityName=addr.get(0).locality
-        save("city",cityName)
-        // cityTextView.text=cityName
-    }
-    **/
     private  fun save(key:String,value:String){
         val  sharedPreferences=activity!!.getSharedPreferences("weather",Context.MODE_PRIVATE)
         val editor=sharedPreferences.edit()
@@ -366,6 +351,17 @@ class ReportFragment : Fragment() {
 
     }
 
+    override fun onItemClick(place: AutocompletePrediction, pos: Int) {
+      //  result.text=place.placeId
+        val placeField= listOf(Place.Field.ID,Place.Field.NAME,Place.Field.LAT_LNG)
+        val request= FetchPlaceRequest.newInstance(place.placeId,placeField)
+        placesClient.fetchPlace(request).addOnSuccessListener { response: FetchPlaceResponse ->
+            val place=response.place
+            Toast.makeText(activity,"Place name"+place.latLng,Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener { exception: Exception ->
+            Toast.makeText(activity,"Place not found: ${exception.message}",Toast.LENGTH_SHORT).show()
 
+        }
+    }
 
 }

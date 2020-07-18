@@ -3,9 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/sign_out"
-        android:icon="@drawable/ic_refresh_foreground"
         android:title="Sign Out"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/refresh"
+        android:title="Refresh"
+        android:icon="@drawable/ic_refresh_foreground"
+        app:showAsAction="ifRoom"/>
 
 
 </menu>

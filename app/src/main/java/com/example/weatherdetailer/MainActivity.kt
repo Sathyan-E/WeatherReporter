@@ -47,16 +47,6 @@ class MainActivity : AppCompatActivity() {
        TabLayoutMediator(tablayout,viewPager2){tab, position ->
            tab.text=num[position]
        }.attach()
-    /**
-       FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener(OnCompleteListener { task ->
-           if (!task.isSuccessful){
-               Log.w("Push Notification","get InstanceId Failed",task.exception)
-               return@OnCompleteListener
-           }
-           val token=task.result?.token
-           val msg=getString()
-       })
-    **/
    }
 
 
@@ -131,6 +121,10 @@ class MainActivity : AppCompatActivity() {
 
             AuthUI.getInstance().signOut(this)
             Toast.makeText(this,"Sign out button clciked",Toast.LENGTH_SHORT).show()
+        }
+        else if(item.itemId==R.id.refresh){
+            Toast.makeText(this,"Refresh is clicked",Toast.LENGTH_SHORT).show()
+          //  adapter.notifyDataSetChanged()
         }
         return true
     }
