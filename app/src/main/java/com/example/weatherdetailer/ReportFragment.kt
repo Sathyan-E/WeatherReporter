@@ -206,6 +206,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                placesRecyclerView.visibility=View.VISIBLE
                 val token= AutocompleteSessionToken.newInstance()
                 val bound= RectangularBounds.newInstance(
                     LatLng(0.0,0.0), LatLng(0.0,0.0))
