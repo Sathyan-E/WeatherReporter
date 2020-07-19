@@ -131,13 +131,14 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
         }
 
         placesClient= Places.createClient(context!!)
+       /**
         autocompleteFragment=childFragmentManager.findFragmentById(R.id.report_autocomplete_fragment) as AutocompleteSupportFragment
         autocompleteFragment.setTypeFilter(TypeFilter.CITIES)
         autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.LAT_LNG, Place.Field.NAME))
 
         //nameTextView.text=user
        // cityTextView.text=city
-
+        **/
         progrssBar=view.findViewById(R.id.report_progressbar)
        // progrssBar.visibility=View.INVISIBLE
 
@@ -177,7 +178,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
             imagefile.delete()
 
         }
-
+        /**
         autocompleteFragment.setOnPlaceSelectedListener(object :PlaceSelectionListener{
             override fun onPlaceSelected(p0: Place) {
                 Toast.makeText(activity,"LATLNG is"+p0.latLng,Toast.LENGTH_SHORT).show()
@@ -193,6 +194,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
             }
 
         })
+        **/
 
         search.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
@@ -361,7 +363,9 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
         val placeField= listOf(Place.Field.ID,Place.Field.NAME,Place.Field.LAT_LNG)
         val request= FetchPlaceRequest.newInstance(place.placeId,placeField)
         placesClient.fetchPlace(request).addOnSuccessListener { response: FetchPlaceResponse ->
+            placesRecyclerView.visibility=View.GONE
             val place=response.place
+            cityTextView.text=place.name
             loadData(place.latLng!!.latitude.toString(),place.latLng!!.longitude.toString())
             Toast.makeText(activity,"Place name"+place.latLng,Toast.LENGTH_SHORT).show()
         }.addOnFailureListener { exception: Exception ->

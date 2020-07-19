@@ -11,6 +11,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -25,11 +27,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherdetailer.adapter.DateForecastAdapter
 import com.example.weatherdetailer.adapter.DatePastDataAdapter
+import com.example.weatherdetailer.adapter.OnPlaceClickListener
+import com.example.weatherdetailer.adapter.PlacesPredictionAdapter
 import com.example.weatherdetailer.network.*
 import com.google.android.gms.common.api.Status
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.model.*
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.FetchPlaceResponse
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import retrofit2.Call
@@ -45,7 +53,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
-class DateFragment : Fragment() {
+class DateFragment : Fragment(),OnPlaceClickListener {
     private lateinit var calendarView: CalendarView
     private lateinit var unitType:String
     var  m:String=""
@@ -71,6 +79,13 @@ class DateFragment : Fragment() {
     private lateinit var shareButton: Button
     private lateinit var sharingLayout: LinearLayout
     public var currentUnit=""
+    private lateinit var placeEditText: EditText
+    private lateinit var placeRecyclerView: RecyclerView
+    private lateinit var placeAdapter:PlacesPredictionAdapter
+    private lateinit var placesClient: PlacesClient
+    private var placeList:ArrayList<AutocompletePrediction> = ArrayList()
+    private var selectedPlace=""
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -88,6 +103,12 @@ class DateFragment : Fragment() {
         shareButton=view.findViewById(R.id.datefragment_share_button)
         sharingLayout=view.findViewById(R.id.layout_sharing)
         shareButton.isEnabled=false
+        placeEditText=view.findViewById(R.id.find_place_editview)
+        placeRecyclerView=view.findViewById(R.id.place_recycler_datefragment)
+        placeRecyclerView.layoutManager=LinearLayoutManager(context)
+
+        placeAdapter= PlacesPredictionAdapter(placeList,this)
+        placeRecyclerView.adapter=placeAdapter
 
         shareButton.setOnClickListener {
             ActivityCompat.requestPermissions(
@@ -124,15 +145,53 @@ class DateFragment : Fragment() {
 
 
         }
-        Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
-        var placesClient=Places.createClient(context!!)
-        
+        if (!Places.isInitialized()){
+            Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
+        }
+        placesClient=Places.createClient(context!!)
+
+        placeEditText.addTextChangedListener(object :TextWatcher{
+            override fun afterTextChanged(p0: Editable?) {
+
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                placeRecyclerView.visibility=View.VISIBLE
+                val token=AutocompleteSessionToken.newInstance()
+                val bounds=RectangularBounds.newInstance(LatLng(0.0,0.0), LatLng(0.0,0.0))
+                val request=FindAutocompletePredictionsRequest.builder().
+                        setSessionToken(token)
+                    .setTypeFilter(TypeFilter.CITIES)
+                    .setLocationBias(bounds)
+                    .setQuery(p0.toString())
+                    .build()
+                placesClient.findAutocompletePredictions(request).addOnSuccessListener { findAutocompletePredictionsResponse ->
+                    placeList.clear()
+                    for(prediction:AutocompletePrediction in findAutocompletePredictionsResponse.autocompletePredictions){
+                        placeList.add(prediction)
+                        //sBuilder.append(" ").append(prediction.getFullText(null)).toString()+"\n"
+                        Toast.makeText(activity,"Place ID is"+prediction.getFullText(null),Toast.LENGTH_SHORT).show()
+                    }
+                    placeAdapter.notifyDataSetChanged()
+                }.addOnFailureListener { exception ->
+                    Toast.makeText(activity,""+exception.message,Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        })
+
+       /**
         autocompleteSupportFragment=childFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
         autocompleteSupportFragment.setTypeFilter(TypeFilter.CITIES)
         autocompleteSupportFragment.setPlaceFields(listOf(Place.Field.ID,Place.Field.LAT_LNG,Place.Field.NAME) )
+
+    **/
         recyclerView=view.findViewById(R.id.recycler)
         recyclerView.layoutManager=LinearLayoutManager(context)
-
 
 
         dateAdapter= DateForecastAdapter(responseList,currentUnit)
@@ -170,7 +229,6 @@ class DateFragment : Fragment() {
                 isPast=false
                 recyclerView.adapter=dateAdapter
                 if (isPlaceSelected){
-
                     loadForecast(selectedLat,selectedlon,m)
                 }else{
 
@@ -195,6 +253,7 @@ class DateFragment : Fragment() {
 
 
         }
+       /**
         autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(p0: Place) {
                shareButton.isEnabled=true
@@ -222,7 +281,7 @@ class DateFragment : Fragment() {
                 Toast.makeText(activity,"Error:$p0",Toast.LENGTH_SHORT).show()
             }
         })
-
+        **/
 
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
         val animationSet:AnimationSet= AnimationSet(true)
@@ -255,7 +314,7 @@ class DateFragment : Fragment() {
 
     private  fun loadForecast(lat: String,lng:String, day:String){
         lastUpdate=2
-        val date= "Date :$m Location: $selectedCity"
+        val date= "Date :$m Location: $selectedPlace"
         currentDataTextview.text=date
 
         findUnit()
@@ -309,7 +368,7 @@ class DateFragment : Fragment() {
     }
     private  fun loadPastData(lat:String,lon:String,dt:String){
         lastUpdate=0
-        val date= "Date :$m Location: $selectedCity"
+        val date= "Date :$m Location: $selectedPlace"
         currentDataTextview.text=date
 
         findUnit()
@@ -355,7 +414,7 @@ class DateFragment : Fragment() {
     }
     private fun loadCurrentData(lat:String,lng:String){
         lastUpdate=1
-        val date="Date :$m Location: $selectedCity"
+        val date="Date :$m Location: $selectedPlace"
         currentDataTextview.text= date
 
         findUnit()
@@ -400,6 +459,33 @@ class DateFragment : Fragment() {
         else if(unit=="farenheit"){
             unitType="imperial"
             currentUnit="F"
+        }
+
+    }
+
+    override fun onItemClick(place: AutocompletePrediction, pos: Int) {
+        isPlaceSelected=true
+        val placeField= listOf(Place.Field.ID,Place.Field.NAME,Place.Field.LAT_LNG)
+        val placeRequest=FetchPlaceRequest.newInstance(place.placeId,placeField)
+        placesClient.fetchPlace(placeRequest).addOnSuccessListener {fetchPlaceResponse: FetchPlaceResponse? ->
+            placeRecyclerView.visibility=View.GONE
+            val place=fetchPlaceResponse!!.place
+            selectedPlace=place.name.toString()
+            selectedLat=place.latLng!!.latitude.toString()
+            selectedlon=place.latLng!!.longitude.toString()
+            if(!isDateChanged){
+                Toast.makeText(activity, "status change of date$isDateChanged",Toast.LENGTH_SHORT).show()
+                recyclerView.adapter=dateAdapter
+                loadCurrentData(selectedLat,selectedlon)
+            }else if(isDateChanged){
+                if(isPast){
+                    loadPastData(selectedLat,selectedlon,selectedDate)
+                }else if(isfuture){
+                    loadForecast(selectedLat,selectedlon,m)
+                }
+            }
+
+
         }
 
     }
