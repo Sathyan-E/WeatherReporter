@@ -220,6 +220,7 @@ class CurrentFragment : Fragment(){
     override fun onResume() {
         super.onResume()
         val unit:String? =getData(sharedPreferences,"unit")
+        cardView.visibility=View.VISIBLE
         if (lastUnit!=unit){
             progressBar.visibility=View.VISIBLE
             refresh()

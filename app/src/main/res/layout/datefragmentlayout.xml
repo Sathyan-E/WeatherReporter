@@ -49,18 +49,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:hint="Enter your place"
+        android:hint="@string/find_place"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:autofillHints="@string/find_place"
+        android:inputType="text" />
+
+
+    <TextView
+        android:id="@+id/no_places_found"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:gravity="center"
+        android:text="@string/no_places_found"
+        android:textStyle="bold|italic"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/find_place_editview" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/place_recycler_datefragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
         android:visibility="gone"
+        android:layout_marginTop="5dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/find_place_editview" />
+        app:layout_constraintTop_toBottomOf="@+id/no_places_found" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

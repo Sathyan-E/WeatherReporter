@@ -82,6 +82,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
     private lateinit var placesClient: PlacesClient
     private lateinit var listener:OnPlaceClickListener
     private lateinit var linearLayout: LinearLayout
+    private lateinit var noPlaceTextView: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -104,6 +105,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
         shareButton=view.findViewById(R.id.report_sharing_button)
         search=view.findViewById(R.id.search)
         placesRecyclerView=view.findViewById(R.id.places_list_recyclervew)
+        noPlaceTextView=view.findViewById(R.id.no_places_found)
 
         placesRecyclerView.layoutManager=LinearLayoutManager(context)
         placeAdapter= PlacesPredictionAdapter(placeList,this)
@@ -196,7 +198,14 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
                     for(prediction:AutocompletePrediction in findAutocompletePredictionsResponse.autocompletePredictions){
                        placeList.add(prediction)
                     }
-                    placeAdapter.notifyDataSetChanged()
+                    if (placeList.isEmpty()){
+                        noPlaceTextView.visibility=View.VISIBLE
+                    }
+                    else{
+                        noPlaceTextView.visibility=View.GONE
+                        placeAdapter.notifyDataSetChanged()
+                    }
+                   
 
                 }.addOnFailureListener { exception ->
                     Toast.makeText(activity,exception.message,Toast.LENGTH_SHORT).show()

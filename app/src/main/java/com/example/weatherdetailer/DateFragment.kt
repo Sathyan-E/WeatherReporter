@@ -85,6 +85,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
     private lateinit var placesClient: PlacesClient
     private var placeList:ArrayList<AutocompletePrediction> = ArrayList()
     private var selectedPlace=""
+    private lateinit var noPlaceFoundTextView: TextView
 
 
     override fun onCreateView(
@@ -105,8 +106,9 @@ class DateFragment : Fragment(),OnPlaceClickListener {
         shareButton.isEnabled=false
         placeEditText=view.findViewById(R.id.find_place_editview)
         placeRecyclerView=view.findViewById(R.id.place_recycler_datefragment)
-        placeRecyclerView.layoutManager=LinearLayoutManager(context)
+        noPlaceFoundTextView=view.findViewById(R.id.no_places_found)
 
+        placeRecyclerView.layoutManager=LinearLayoutManager(context)
         placeAdapter= PlacesPredictionAdapter(placeList,this)
         placeRecyclerView.adapter=placeAdapter
 
@@ -171,7 +173,13 @@ class DateFragment : Fragment(),OnPlaceClickListener {
                     for(prediction:AutocompletePrediction in findAutocompletePredictionsResponse.autocompletePredictions){
                         placeList.add(prediction)
                     }
-                    placeAdapter.notifyDataSetChanged()
+                    if (placeList.isEmpty()){
+                        noPlaceFoundTextView.visibility=View.VISIBLE
+                    }else{
+                        noPlaceFoundTextView.visibility=View.GONE
+                        placeAdapter.notifyDataSetChanged()
+                    }
+
                 }.addOnFailureListener { exception ->
                     Toast.makeText(activity,""+exception.message,Toast.LENGTH_SHORT).show()
                 }
