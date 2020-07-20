@@ -364,11 +364,14 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
         val placeField= listOf(Place.Field.ID,Place.Field.NAME,Place.Field.LAT_LNG)
         val request= FetchPlaceRequest.newInstance(place.placeId,placeField)
         placesClient.fetchPlace(request).addOnSuccessListener { response: FetchPlaceResponse ->
+            val name=place.getFullText(null)
+            search.setText(name)
             placesRecyclerView.visibility=View.GONE
-            val place=response.place
-            cityTextView.text=place.name
-            loadData(place.latLng!!.latitude.toString(),place.latLng!!.longitude.toString())
-            Toast.makeText(activity,"Place name"+place.latLng,Toast.LENGTH_SHORT).show()
+            val placeDetail=response.place
+            cityTextView.text=placeDetail.name
+            loadData(placeDetail.latLng!!.latitude.toString(),placeDetail.latLng!!.longitude.toString())
+            Toast.makeText(activity,"Place name"+placeDetail.latLng,Toast.LENGTH_SHORT).show()
+
         }.addOnFailureListener { exception: Exception ->
             Toast.makeText(activity,"Place not found: ${exception.message}",Toast.LENGTH_SHORT).show()
 

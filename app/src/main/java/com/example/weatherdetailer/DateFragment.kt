@@ -468,11 +468,12 @@ class DateFragment : Fragment(),OnPlaceClickListener {
         val placeField= listOf(Place.Field.ID,Place.Field.NAME,Place.Field.LAT_LNG)
         val placeRequest=FetchPlaceRequest.newInstance(place.placeId,placeField)
         placesClient.fetchPlace(placeRequest).addOnSuccessListener {fetchPlaceResponse: FetchPlaceResponse? ->
+            placeEditText.setText(place.getFullText(null))
             placeRecyclerView.visibility=View.GONE
-            val place=fetchPlaceResponse!!.place
-            selectedPlace=place.name.toString()
-            selectedLat=place.latLng!!.latitude.toString()
-            selectedlon=place.latLng!!.longitude.toString()
+            val placeDetail=fetchPlaceResponse!!.place
+            selectedPlace=placeDetail.name.toString()
+            selectedLat=placeDetail.latLng!!.latitude.toString()
+            selectedlon=placeDetail.latLng!!.longitude.toString()
             if(!isDateChanged){
                 Toast.makeText(activity, "status change of date$isDateChanged",Toast.LENGTH_SHORT).show()
                 recyclerView.adapter=dateAdapter
