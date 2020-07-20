@@ -86,6 +86,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
     private var placeList:ArrayList<AutocompletePrediction> = ArrayList()
     private var selectedPlace=""
     private lateinit var noPlaceFoundTextView: TextView
+    private lateinit var placesProgressBar: ProgressBar
 
 
     override fun onCreateView(
@@ -107,6 +108,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
         placeEditText=view.findViewById(R.id.find_place_editview)
         placeRecyclerView=view.findViewById(R.id.place_recycler_datefragment)
         noPlaceFoundTextView=view.findViewById(R.id.no_places_found)
+        placesProgressBar=view.findViewById(R.id.places_progressbar)
 
         placeRecyclerView.layoutManager=LinearLayoutManager(context)
         placeAdapter= PlacesPredictionAdapter(placeList,this)
@@ -159,6 +161,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                placesProgressBar.visibility=View.VISIBLE
                 placeRecyclerView.visibility=View.VISIBLE
                 val token=AutocompleteSessionToken.newInstance()
                 val bounds=RectangularBounds.newInstance(LatLng(0.0,0.0), LatLng(0.0,0.0))
@@ -176,6 +179,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
                     if (placeList.isEmpty()){
                         noPlaceFoundTextView.visibility=View.VISIBLE
                     }else{
+                        placesProgressBar.visibility=View.GONE
                         noPlaceFoundTextView.visibility=View.GONE
                         placeAdapter.notifyDataSetChanged()
                     }

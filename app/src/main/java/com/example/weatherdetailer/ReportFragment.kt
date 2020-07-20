@@ -83,6 +83,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
     private lateinit var listener:OnPlaceClickListener
     private lateinit var linearLayout: LinearLayout
     private lateinit var noPlaceTextView: TextView
+    private lateinit var placesProgressBar: ProgressBar
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -106,6 +107,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
         search=view.findViewById(R.id.search)
         placesRecyclerView=view.findViewById(R.id.places_list_recyclervew)
         noPlaceTextView=view.findViewById(R.id.no_places_found)
+        placesProgressBar=view.findViewById(R.id.places_progressbar)
 
         placesRecyclerView.layoutManager=LinearLayoutManager(context)
         placeAdapter= PlacesPredictionAdapter(placeList,this)
@@ -183,6 +185,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                placesProgressBar.visibility=View.VISIBLE
                 placesRecyclerView.visibility=View.VISIBLE
                 val token= AutocompleteSessionToken.newInstance()
                 val bound= RectangularBounds.newInstance(
@@ -203,6 +206,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
                     }
                     else{
                         noPlaceTextView.visibility=View.GONE
+                        placesProgressBar.visibility=View.GONE
                         placeAdapter.notifyDataSetChanged()
                     }
                    
