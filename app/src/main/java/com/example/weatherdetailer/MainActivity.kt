@@ -85,8 +85,7 @@ class MainActivity : AppCompatActivity() {
                 firebaseAuth ->
             val muser=firebaseAuth.currentUser
             if (muser!=null){
-                Toast.makeText(this,"You're now signed in.",Toast.LENGTH_SHORT).show()
-
+                Log.i("Main Activity","User is already signed in")
             }else{
                 startActivityForResult(
                     AuthUI.getInstance()

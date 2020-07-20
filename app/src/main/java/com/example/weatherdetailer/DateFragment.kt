@@ -135,19 +135,16 @@ class DateFragment : Fragment(),OnPlaceClickListener {
             val imagefile = File(mainDirectoryname.absolutePath,name)
             val outPutStream = FileOutputStream(imagefile)
             bitmap.compress(Bitmap.CompressFormat.JPEG,100,outPutStream)
-
-            Toast.makeText(activity,"FIle saved in directory",Toast.LENGTH_SHORT).show()
             outPutStream.flush()
             outPutStream.close()
-
             shareScreenShot(imagefile)
             imagefile.delete()
-
-
         }
+
         if (!Places.isInitialized()){
             Places.initialize(context!!,"AIzaSyD2BU6x8RqFCvHX4BnrIaI0f1ycabOcl2k")
         }
+
         placesClient=Places.createClient(context!!)
 
         placeEditText.addTextChangedListener(object :TextWatcher{
@@ -173,8 +170,6 @@ class DateFragment : Fragment(),OnPlaceClickListener {
                     placeList.clear()
                     for(prediction:AutocompletePrediction in findAutocompletePredictionsResponse.autocompletePredictions){
                         placeList.add(prediction)
-                        //sBuilder.append(" ").append(prediction.getFullText(null)).toString()+"\n"
-                        Toast.makeText(activity,"Place ID is"+prediction.getFullText(null),Toast.LENGTH_SHORT).show()
                     }
                     placeAdapter.notifyDataSetChanged()
                 }.addOnFailureListener { exception ->
@@ -184,12 +179,6 @@ class DateFragment : Fragment(),OnPlaceClickListener {
 
         })
 
-       /**
-        autocompleteSupportFragment=childFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment
-        autocompleteSupportFragment.setTypeFilter(TypeFilter.CITIES)
-        autocompleteSupportFragment.setPlaceFields(listOf(Place.Field.ID,Place.Field.LAT_LNG,Place.Field.NAME) )
-
-    **/
         recyclerView=view.findViewById(R.id.recycler)
         recyclerView.layoutManager=LinearLayoutManager(context)
 
@@ -247,47 +236,11 @@ class DateFragment : Fragment(),OnPlaceClickListener {
 
                     Toast.makeText(activity,"Select the place",Toast.LENGTH_SHORT).show()
                 }
-
-
             }
-
-
         }
-       /**
-        autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-            override fun onPlaceSelected(p0: Place) {
-               shareButton.isEnabled=true
-                Toast.makeText(activity,"Place selected"+p0.name+" "+p0.latLng!!.latitude+" "+p0.latLng!!.longitude,Toast.LENGTH_SHORT).show()
-                selectedLat=p0.latLng!!.latitude.toString()
-                selectedlon=p0.latLng!!.longitude.toString()
-                selectedCity= p0.name.toString()
-                isPlaceSelected=true
-                if(!isDateChanged){
-                    Toast.makeText(activity, "status change of date$isDateChanged",Toast.LENGTH_SHORT).show()
-                    recyclerView.adapter=dateAdapter
-                    loadCurrentData(selectedLat,selectedlon)
-                }else if(isDateChanged){
-                    if(isPast){
-                        loadPastData(selectedLat,selectedlon,selectedDate)
-                    }else if(isfuture){
-                        loadForecast(selectedLat,selectedlon,m)
-                    }
-                }
-
-
-            }
-
-            override fun onError(p0: Status) {
-                Toast.makeText(activity,"Error:$p0",Toast.LENGTH_SHORT).show()
-            }
-        })
-        **/
-
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
-        val animationSet:AnimationSet= AnimationSet(true)
-
-
     }
+
     private fun shareScreenShot(imageFile:File){
         val fileuri: Uri = FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
         val intent= Intent()
@@ -295,8 +248,6 @@ class DateFragment : Fragment(),OnPlaceClickListener {
         intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_STREAM,fileuri)
         startActivity(Intent.createChooser(intent,"Share Screenshot"))
-
-
     }
 
     override fun onResume() {
@@ -475,7 +426,6 @@ class DateFragment : Fragment(),OnPlaceClickListener {
             selectedLat=placeDetail.latLng!!.latitude.toString()
             selectedlon=placeDetail.latLng!!.longitude.toString()
             if(!isDateChanged){
-                Toast.makeText(activity, "status change of date$isDateChanged",Toast.LENGTH_SHORT).show()
                 recyclerView.adapter=dateAdapter
                 loadCurrentData(selectedLat,selectedlon)
             }else if(isDateChanged){

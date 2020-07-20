@@ -131,14 +131,6 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
         }
 
         placesClient= Places.createClient(context!!)
-       /**
-        autocompleteFragment=childFragmentManager.findFragmentById(R.id.report_autocomplete_fragment) as AutocompleteSupportFragment
-        autocompleteFragment.setTypeFilter(TypeFilter.CITIES)
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.LAT_LNG, Place.Field.NAME))
-
-        //nameTextView.text=user
-       // cityTextView.text=city
-        **/
         progrssBar=view.findViewById(R.id.report_progressbar)
        // progrssBar.visibility=View.INVISIBLE
 
@@ -178,23 +170,6 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
             imagefile.delete()
 
         }
-        /**
-        autocompleteFragment.setOnPlaceSelectedListener(object :PlaceSelectionListener{
-            override fun onPlaceSelected(p0: Place) {
-                Toast.makeText(activity,"LATLNG is"+p0.latLng,Toast.LENGTH_SHORT).show()
-                selectedLat=p0.latLng!!.latitude.toString()
-                selectedLon=p0.latLng!!.longitude.toString()
-                progrssBar.visibility=View.VISIBLE
-                cityTextView.text=p0.name
-                loadData(selectedLat,selectedLon)
-            }
-
-            override fun onError(p0: Status) {
-
-            }
-
-        })
-        **/
 
         search.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
@@ -217,31 +192,23 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
                     .setQuery(search.text.toString()).build()
 
                 placesClient.findAutocompletePredictions(request).addOnSuccessListener { findAutocompletePredictionsResponse ->
-                    //sBuilder= StringBuilder()
                     placeList.clear()
                     for(prediction:AutocompletePrediction in findAutocompletePredictionsResponse.autocompletePredictions){
                        placeList.add(prediction)
-                        //sBuilder.append(" ").append(prediction.getFullText(null)).toString()+"\n"
-                        Toast.makeText(activity,"Place ID is"+prediction.getFullText(null),Toast.LENGTH_SHORT).show()
                     }
                     placeAdapter.notifyDataSetChanged()
 
-
-                }.addOnFailureListener{
-                    Toast.makeText(activity,"add failure listener",Toast.LENGTH_SHORT).show()
+                }.addOnFailureListener { exception ->
+                    Toast.makeText(activity,exception.message,Toast.LENGTH_SHORT).show()
                 }
 
-
-
             }
-
         })
-
     }
 
     private fun shareScreenShot(imageFile:File){
-        val fileuri: Uri = FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
 
+        val fileuri: Uri = FileProvider.getUriForFile(context!!,"com.example.weatherdetailer.provider",imageFile)
         val intent= Intent()
         intent.action = Intent.ACTION_SEND
         intent.type = "image/*"
@@ -253,7 +220,6 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
     private fun loadData(lat:String,lon:String){
 
         findUnit()
-
         val reportRetofit = Retrofit.Builder().baseUrl("https://api.openweathermap.org/").addConverterFactory(GsonConverterFactory.create()).build()
         val service = reportRetofit.create(WeatherService::class.java)
 
@@ -293,7 +259,8 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
         super.onResume()
         refreshReport()
     }
-   public fun refreshReport(){
+
+    fun refreshReport(){
         val unit =getData(sharedPreferences,"unit")
         val isConnected=isInternetConnected()
         if ( lastUsedUnit!=unit){
