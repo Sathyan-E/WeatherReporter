@@ -88,7 +88,8 @@ class CurrentFragment : Fragment(){
         detailsTextView=view.findViewById(R.id.problem_details_textview)
        // ssImageView=view.findViewById(R.id.screeenshot_imageview)
         //making cardview invisible it will visible when we completes the fetching the data process
-        cardView.visibility=View.INVISIBLE
+        hideCardview()
+        //cardView.visibility=View.INVISIBLE
        //fusedlocationclient instantiation
         fusedLocationClient= LocationServices.getFusedLocationProviderClient(activity!!)
 
@@ -180,8 +181,10 @@ class CurrentFragment : Fragment(){
                     if (response.code() == 200){
                         val weatherResponse=response.body()
                         //setting the fetched data into cardview
-                        cardView.visibility=View.VISIBLE
-                        progressBar.visibility=View.INVISIBLE
+                        showCardview()
+                        //cardView.visibility=View.VISIBLE
+                        hideProgressbar()
+                        //progressBar.visibility=View.INVISIBLE
                         shareButton.isEnabled=true
                         presentCityName.text=weatherResponse.name
                         presentCityDescription.text=weatherResponse.weather[0].description
@@ -220,9 +223,11 @@ class CurrentFragment : Fragment(){
     override fun onResume() {
         super.onResume()
         val unit:String? =getData(sharedPreferences,"unit")
-        cardView.visibility=View.VISIBLE
+        showCardview()
+        //cardView.visibility=View.VISIBLE
         if (lastUnit!=unit){
-            progressBar.visibility=View.VISIBLE
+           showProgressbar()
+           // progressBar.visibility=View.VISIBLE
             refresh()
         }
 
@@ -232,8 +237,9 @@ class CurrentFragment : Fragment(){
         if (isConnected){
             getLastLocation()
         }else{
-            progressBar.visibility=View.INVISIBLE
-            cardView.visibility=View.INVISIBLE
+            hideProgressbar()
+            hideCardview()
+            //cardView.visibility=View.INVISIBLE
             Toast.makeText(activity,"No Internet Connection!",Toast.LENGTH_SHORT).show()
         }
 
@@ -328,6 +334,18 @@ class CurrentFragment : Fragment(){
         cardView.visibility=View.INVISIBLE
     }
 
+    fun showProgressbar(){
+        progressBar.visibility=View.VISIBLE
+    }
+    fun hideProgressbar(){
+        progressBar.visibility=View.INVISIBLE
+    }
+    fun showCardview(){
+        cardView.visibility=View.VISIBLE
+    }
+    fun hideCardview(){
+        cardView.visibility=View.INVISIBLE
+    }
 
 
 }
