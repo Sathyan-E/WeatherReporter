@@ -245,7 +245,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
                     loadPastData(selectedLat,selectedlon,selectedDate)
                 }
                 else{
-
+                    placeEditText.error="Enter the Place name"
                     Toast.makeText(activity,"Select the place",Toast.LENGTH_SHORT).show()
                 }
             }
