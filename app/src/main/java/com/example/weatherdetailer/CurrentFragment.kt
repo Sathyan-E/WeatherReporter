@@ -86,11 +86,9 @@ class CurrentFragment : Fragment(){
         progressBar=view.findViewById(R.id.current_progress_bar)
         shareButton=view.findViewById(R.id.share_button)
         detailsTextView=view.findViewById(R.id.problem_details_textview)
-       // ssImageView=view.findViewById(R.id.screeenshot_imageview)
         //making cardview invisible it will visible when we completes the fetching the data process
         hideCardview()
-        //cardView.visibility=View.INVISIBLE
-       //fusedlocationclient instantiation
+
         fusedLocationClient= LocationServices.getFusedLocationProviderClient(activity!!)
 
         //sharedpreference intantiating
@@ -223,7 +221,7 @@ class CurrentFragment : Fragment(){
     override fun onResume() {
         super.onResume()
         val unit:String? =getData(sharedPreferences,"unit")
-        showCardview()
+
         //cardView.visibility=View.VISIBLE
         if (lastUnit!=unit){
            showProgressbar()
@@ -344,7 +342,7 @@ class CurrentFragment : Fragment(){
         cardView.visibility=View.VISIBLE
     }
     fun hideCardview(){
-        cardView.visibility=View.INVISIBLE
+        cardView.visibility=View.GONE
     }
 
 
