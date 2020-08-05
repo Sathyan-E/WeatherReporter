@@ -16,6 +16,8 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.animation.AnimationSet
 import android.widget.*
@@ -87,6 +89,8 @@ class DateFragment : Fragment(),OnPlaceClickListener {
     private var selectedPlace=""
     private lateinit var noPlaceFoundTextView: TextView
     private lateinit var placesProgressBar: ProgressBar
+    private lateinit var displayDate:TextView
+    private var isCalenderVisible=false
 
 
     override fun onCreateView(
@@ -109,6 +113,13 @@ class DateFragment : Fragment(),OnPlaceClickListener {
         placeRecyclerView=view.findViewById(R.id.place_recycler_datefragment)
         noPlaceFoundTextView=view.findViewById(R.id.no_places_found)
         placesProgressBar=view.findViewById(R.id.places_progressbar)
+        displayDate=view.findViewById(R.id.date_display_textview)
+
+        displayDate.text="Click to select date"
+        displayDate.setOnClickListener{
+            it.visibility= GONE
+            CalenderDisplay()
+        }
 
         placeRecyclerView.layoutManager=LinearLayoutManager(context)
         placeAdapter= PlacesPredictionAdapter(placeList,this)
@@ -198,6 +209,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
         dateAdapter= DateForecastAdapter(responseList,currentUnit)
         pastDataAdapter= DatePastDataAdapter(historyDataList,currentUnit)
         calendarView=view.findViewById(R.id.calenderView)
+        calendarView.visibility= GONE
 
         val date=calendarView.date
         val min=date-432000000
@@ -206,6 +218,8 @@ class DateFragment : Fragment(),OnPlaceClickListener {
         calendarView.minDate=min
         calendarView.maxDate=max
         calendarView.setOnDateChangeListener{ view, year, month, dayOfMonth ->
+            displayDate.visibility= VISIBLE
+
 
             m= "$year-"
             m += if(month<10){
@@ -219,12 +233,13 @@ class DateFragment : Fragment(),OnPlaceClickListener {
             }else{
                 "$dayOfMonth"
             }
-
+            displayDate.text=m
             val l=LocalDate.parse(m, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
             val unix=l.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             currentTime=System.currentTimeMillis()
             isDateChanged=true
             selectedDate=(unix/1000).toString()
+            calendarView.visibility= GONE
             if(unix>currentTime){
                 isfuture=true
                 isPast=false
@@ -251,6 +266,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
             }
         }
         sharedPreferences= activity?.getSharedPreferences("weather", Context.MODE_PRIVATE)!!
+
     }
 
     private fun shareScreenShot(imageFile:File){
@@ -448,7 +464,16 @@ class DateFragment : Fragment(),OnPlaceClickListener {
                 }
             }
 
+        }
 
+    }
+
+    fun CalenderDisplay(){
+
+        if (isCalenderVisible==false){
+            calendarView.visibility=VISIBLE
+        }else{
+            calendarView.visibility= GONE
         }
 
     }
