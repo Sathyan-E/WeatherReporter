@@ -6,6 +6,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,8 +18,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
-import kotlinx.android.synthetic.main.activity_main.*
+
 
 class SettingFragment : Fragment() {
     private lateinit var switch:Switch
@@ -42,6 +43,7 @@ class SettingFragment : Fragment() {
 
         val pendingIntent = PendingIntent.getActivity(context,0,intent,0)
         createNotificationChannel()
+        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         var builder= NotificationCompat.Builder(context!!,"10")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Notification")
@@ -49,6 +51,7 @@ class SettingFragment : Fragment() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+            .setSound(alarmSound)
 
 
 

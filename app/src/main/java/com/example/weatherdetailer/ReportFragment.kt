@@ -187,6 +187,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 placesProgressBar.visibility=View.VISIBLE
                 placesRecyclerView.visibility=View.VISIBLE
+                shareButton.isEnabled=false
                 val token= AutocompleteSessionToken.newInstance()
                 val bound= RectangularBounds.newInstance(
                     LatLng(0.0,0.0), LatLng(0.0,0.0))
@@ -250,6 +251,7 @@ class ReportFragment : Fragment(),OnPlaceClickListener   {
                         progrssBar.visibility=View.INVISIBLE
                         recyclerView.visibility=View.VISIBLE
                         recyclerAdapter!!.notifyDataSetChanged()
+                        shareButton.isEnabled=true
 
                     }else{
                         Toast.makeText(activity,"Error in Response",Toast.LENGTH_SHORT).show()
