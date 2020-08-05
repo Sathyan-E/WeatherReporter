@@ -18,6 +18,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
+import com.example.weatherdetailer.localnotification.NotificationHelper
 
 
 class SettingFragment : Fragment() {
@@ -36,7 +37,15 @@ class SettingFragment : Fragment() {
 
 
         switch=view.findViewById(R.id.unit_switch)
+        val notificationHelper =NotificationHelper(context!!)
 
+
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            notificationHelper.createNotificationChannel()
+        }
+
+/**
         val intent= Intent(context,MainActivity::class.java).apply {
             flags= Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         }
@@ -54,15 +63,12 @@ class SettingFragment : Fragment() {
             .setSound(alarmSound)
 
 
-
+**/
         switch.setOnCheckedChangeListener { _, isChecked ->
             val m=if (isChecked) "farenheit" else "celsius"
             switch.text=m
 
-            with(NotificationManagerCompat.from(context!!)){
-                notify(1,builder.build())
-            }
-
+           notificationHelper.creteNotification()
             update(m)
         }
 
