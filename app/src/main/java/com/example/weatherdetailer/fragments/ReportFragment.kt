@@ -1,4 +1,4 @@
-package com.example.weatherdetailer
+package com.example.weatherdetailer.fragments
 
 import android.Manifest
 import android.content.Context
@@ -7,14 +7,11 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.location.Geocoder
-import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -27,13 +24,13 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.weatherdetailer.R
 import com.example.weatherdetailer.adapter.OnPlaceClickListener
 import com.example.weatherdetailer.adapter.PlacesPredictionAdapter
 import com.example.weatherdetailer.adapter.ReportViewAdapter
 import com.example.weatherdetailer.network.MonthlyResponse
 import com.example.weatherdetailer.network.WeatherResponse
 import com.example.weatherdetailer.network.WeatherService
-import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
@@ -43,7 +40,6 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -52,7 +48,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
-import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
 

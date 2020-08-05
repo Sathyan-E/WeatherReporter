@@ -1,8 +1,13 @@
-package com.example.weatherdetailer
+package com.example.weatherdetailer.adapter
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.example.weatherdetailer.MainActivity
+import com.example.weatherdetailer.fragments.CurrentFragment
+import com.example.weatherdetailer.fragments.DateFragment
+import com.example.weatherdetailer.fragments.ReportFragment
+import com.example.weatherdetailer.fragments.SettingFragment
 
 class MyStateAdapter(activity: MainActivity):FragmentStateAdapter(activity) {
     override fun getItemCount(): Int {
@@ -14,7 +19,7 @@ class MyStateAdapter(activity: MainActivity):FragmentStateAdapter(activity) {
         var name:String
         when(position){
             0 ->{
-                fragment=CurrentFragment()
+                fragment= CurrentFragment()
                 name="Current"
             }
             1-> {
@@ -23,7 +28,7 @@ class MyStateAdapter(activity: MainActivity):FragmentStateAdapter(activity) {
             }
 
             2->{
-                fragment=ReportFragment()
+                fragment= ReportFragment()
                 name="Report"
             }
             3-> {

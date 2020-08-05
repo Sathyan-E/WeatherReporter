@@ -1,4 +1,4 @@
-package com.example.weatherdetailer
+package com.example.weatherdetailer.fragments
 
 import android.Manifest
 import android.content.Context
@@ -7,10 +7,8 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.location.Geocoder
 import android.location.LocationManager
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -24,12 +22,11 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import com.example.weatherdetailer.R
 //import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.weatherdetailer.network.WeatherResponse
 import com.example.weatherdetailer.network.WeatherService
-import com.firebase.ui.auth.AuthUI
 import com.google.android.gms.location.*
-import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback

@@ -1,4 +1,4 @@
-package com.example.weatherdetailer
+package com.example.weatherdetailer.fragments
 
 import android.Manifest
 import android.content.Context
@@ -19,7 +19,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import android.view.animation.AnimationSet
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -27,12 +26,12 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.weatherdetailer.R
 import com.example.weatherdetailer.adapter.DateForecastAdapter
 import com.example.weatherdetailer.adapter.DatePastDataAdapter
 import com.example.weatherdetailer.adapter.OnPlaceClickListener
 import com.example.weatherdetailer.adapter.PlacesPredictionAdapter
 import com.example.weatherdetailer.network.*
-import com.google.android.gms.common.api.Status
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.*
@@ -41,7 +40,6 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
-import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
