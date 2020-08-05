@@ -16,6 +16,10 @@ class NotificationHelper(val context: Context) {
 
 
      fun  creteNotification(){
+       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+           createNotificationChannel()
+       }
+
         val intent= Intent(context, MainActivity::class.java).apply {
             flags= Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         }

@@ -1,6 +1,8 @@
 package com.example.weatherdetailer
 
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -11,10 +13,12 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.viewpager2.widget.ViewPager2
 import com.example.weatherdetailer.adapter.MyStateAdapter
+import com.example.weatherdetailer.localnotification.AlarmReceiver
 import com.firebase.ui.auth.AuthUI
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -125,5 +129,24 @@ class MainActivity : AppCompatActivity() {
           //  adapter.notifyDataSetChanged()
         }
         return true
+    }
+
+    public  fun myAlarm(){
+        val calendar=Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY,22)
+        calendar.set(Calendar.MINUTE,40)
+
+        if(calendar.time.compareTo(Date())<0){
+            calendar.add(Calendar.DAY_OF_MONTH,1)
+        }
+
+        val intent=Intent(applicationContext,AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(applicationContext,1,intent,PendingIntent.FLAG_UPDATE_CURRENT)
+        val alarmManager=getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,calendar.timeInMillis,AlarmManager.INTERVAL_DAY,pendingIntent)
+
+
+
     }
 }
