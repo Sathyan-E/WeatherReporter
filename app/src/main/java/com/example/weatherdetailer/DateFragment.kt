@@ -174,6 +174,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 placesProgressBar.visibility=View.VISIBLE
                 placeRecyclerView.visibility=View.VISIBLE
+                shareButton.isEnabled=false
                 val token=AutocompleteSessionToken.newInstance()
                 val bounds=RectangularBounds.newInstance(LatLng(0.0,0.0), LatLng(0.0,0.0))
                 val request=FindAutocompletePredictionsRequest.builder().
@@ -325,6 +326,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
                         }
                         responseList.addAll(array)
                         dateAdapter!!.notifyDataSetChanged()
+                        EnableShareButton()
 
                     }
 
@@ -377,6 +379,7 @@ class DateFragment : Fragment(),OnPlaceClickListener {
                         historyDataList.clear()
                         historyDataList.addAll(array)
                         pastDataAdapter!!.notifyDataSetChanged()
+                        EnableShareButton()
                     }
                     else{
                         Toast.makeText(activity,"Error Response Code",Toast.LENGTH_SHORT).show()
@@ -408,11 +411,13 @@ class DateFragment : Fragment(),OnPlaceClickListener {
         call.enqueue(object : Callback<WeatherResponse> {
             override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>?) {
                 if (response!=null){
+
                     if (response.code() == 200){
                         val weatherResponse=response.body()
                        responseList.clear()
                         responseList.add(weatherResponse)
                         dateAdapter!!.notifyDataSetChanged()
+                        EnableShareButton()
                     }
                 }
                 else{
@@ -476,6 +481,10 @@ class DateFragment : Fragment(),OnPlaceClickListener {
             calendarView.visibility= GONE
         }
 
+    }
+
+    fun EnableShareButton(){
+        shareButton.isEnabled=true
     }
 
 }
