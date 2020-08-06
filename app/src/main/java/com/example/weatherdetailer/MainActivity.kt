@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
 
     public  fun myAlarm(){
         val calendar=Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY,22)
+        calendar.set(Calendar.HOUR_OF_DAY,6)
         calendar.set(Calendar.MINUTE,40)
 
         if(calendar.time.compareTo(Date())<0){

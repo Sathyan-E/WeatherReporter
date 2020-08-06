@@ -117,8 +117,12 @@
                 android:textColor="@android:color/black"
                 android:textSize="15sp"
                 android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/round_cornor"
+                android:layout_margin="10dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/place_recycler_datefragment" />
+                app:layout_constraintTop_toBottomOf="@+id/place_recycler_datefragment"
+                android:focusable="true" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
